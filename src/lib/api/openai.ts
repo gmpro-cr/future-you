@@ -32,36 +32,26 @@ export async function generateChatResponse(
   userMessage: string
 ) {
   try {
-    // Use Gemini 1.5 Pro model
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    // Use Gemini 2.5 Flash model (fast and efficient) - exact name from API
+    const model = genAI.getGenerativeModel({ model: 'models/gemini-2.5-flash-preview-05-20' });
 
-    // Build conversation history for Gemini
-    const history = messages
+    // Build conversation context from history
+    const contextMessages = messages
       .filter((msg) => msg.role !== 'system')
       .slice(-8) // Keep last 8 messages for context
-      .map((msg) => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.content }],
-      }));
+      .map((msg) => `${msg.role === 'user' ? 'User' : 'You'}: ${msg.content}`)
+      .join('\n\n');
 
-    // Start chat with history
-    const chat = model.startChat({
-      history,
-      generationConfig: {
-        temperature: 0.8,
-        maxOutputTokens: 500,
-        topP: 0.95,
-        topK: 40,
-      },
-    });
+    // Combine system prompt, history, and user message
+    const fullPrompt = `${systemPrompt}
 
-    // Combine system prompt with user message
-    const fullPrompt = `${systemPrompt}\n\nUser: ${userMessage}\n\nRespond as the future self persona:`;
+${contextMessages ? `Previous conversation:\n${contextMessages}\n\n` : ''}Question: ${userMessage}
 
-    // Send message
-    const result = await chat.sendMessage(fullPrompt);
-    const response = result.response;
-    const responseText = response.text();
+Answer:`;
+
+    // Generate response using simple string format
+    const result = await model.generateContent(fullPrompt);
+    const responseText = result.response.text();
 
     // Gemini doesn't provide detailed token counts like OpenAI
     // Estimate based on text length
