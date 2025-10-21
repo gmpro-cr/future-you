@@ -9,7 +9,7 @@ import { FullPageLoader } from '@/components/shared/Loader';
 
 export default function ChatPage() {
   const router = useRouter();
-  const { selectedPersona, isLoading: personaLoading } = usePersona();
+  const { selectedPersona, customDescription, isLoading: personaLoading } = usePersona();
   const { fingerprint, isLoading: fingerprintLoading } = useFingerprint();
 
   useEffect(() => {
@@ -30,6 +30,7 @@ export default function ChatPage() {
     <ChatInterface
       persona={selectedPersona}
       sessionId={fingerprint}
+      customDescription={customDescription}
       onChangePersona={handleChangePersona}
     />
   );

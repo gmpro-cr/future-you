@@ -16,13 +16,15 @@ import { generateId } from '@/lib/utils/formatters';
 interface ChatInterfaceProps {
   persona: Persona;
   sessionId: string;
+  customDescription?: string;
   onChangePersona: () => void;
 }
 
-export function ChatInterface({ persona, sessionId, onChangePersona }: ChatInterfaceProps) {
+export function ChatInterface({ persona, sessionId, customDescription, onChangePersona }: ChatInterfaceProps) {
   const { messages, isLoading, error, sendMessage, clearConversation } = useChat(
     persona.type,
-    sessionId
+    sessionId,
+    customDescription
   );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showSidebar, setShowSidebar] = useState(false);

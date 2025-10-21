@@ -8,14 +8,14 @@ import { FullPageLoader } from '@/components/shared/Loader';
 
 export default function PersonaPage() {
   const router = useRouter();
-  const { personas, selectedPersona, selectPersona, isLoading } = usePersona();
+  const { personas, selectedPersona, customDescription, selectPersona, isLoading } = usePersona();
 
   if (isLoading) {
     return <FullPageLoader />;
   }
 
-  const handlePersonaSelect = (persona: Persona) => {
-    selectPersona(persona);
+  const handlePersonaSelect = (persona: Persona, description?: string) => {
+    selectPersona(persona, description);
   };
 
   const handleContinue = () => {
@@ -32,6 +32,7 @@ export default function PersonaPage() {
     <PersonaGrid
       personas={personas}
       selectedPersona={selectedPersona}
+      customDescription={customDescription}
       onPersonaSelect={handlePersonaSelect}
       onContinue={handleContinue}
       onBack={handleBack}

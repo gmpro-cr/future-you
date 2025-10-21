@@ -9,10 +9,15 @@ import { cn } from '@/lib/utils/formatters';
 interface PersonaCardProps {
   persona: Persona;
   isSelected: boolean;
+  customDescription?: string;
   onSelect: (persona: Persona) => void;
 }
 
-export function PersonaCard({ persona, isSelected, onSelect }: PersonaCardProps) {
+export function PersonaCard({ persona, isSelected, customDescription, onSelect }: PersonaCardProps) {
+  const displayDescription = persona.type === 'custom' && customDescription
+    ? customDescription
+    : persona.description;
+
   return (
     <motion.button
       whileHover={{ scale: 1.05, y: -5 }}
@@ -21,8 +26,15 @@ export function PersonaCard({ persona, isSelected, onSelect }: PersonaCardProps)
       className={cn(
         'relative p-6 rounded-2xl border-3 transition-all duration-300',
         'bg-white shadow-lg hover:shadow-2xl text-left w-full min-h-[200px]',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500',
-        isSelected ? 'border-teal-500 bg-teal-50 ring-2 ring-teal-500' : 'border-gray-200'
+        'focus:outline-none focus:ring-2 focus:ring-offset-2',
+        persona.type === 'custom'
+          ? 'focus:ring-purple-500 border-dashed'
+          : 'focus:ring-teal-500',
+        isSelected
+          ? persona.type === 'custom'
+            ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-500'
+            : 'border-teal-500 bg-teal-50 ring-2 ring-teal-500'
+          : 'border-gray-200'
       )}
     >
       {/* Emoji */}
@@ -32,7 +44,7 @@ export function PersonaCard({ persona, isSelected, onSelect }: PersonaCardProps)
       <h3 className="text-xl font-semibold text-gray-900 mb-2">{persona.name}</h3>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 leading-relaxed">{persona.description}</p>
+      <p className="text-sm text-gray-600 leading-relaxed">{displayDescription}</p>
 
       {/* Tags */}
       <div className="flex flex-wrap gap-2 mt-4">

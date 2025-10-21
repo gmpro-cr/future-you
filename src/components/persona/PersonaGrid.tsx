@@ -1,16 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { Persona } from '@/types';
 import { PersonaCard } from './PersonaCard';
+import { CustomPersonaDialog } from './CustomPersonaDialog';
 import { Button } from '@/components/shared/Button';
 
 interface PersonaGridProps {
   personas: Persona[];
   selectedPersona: Persona | null;
-  onPersonaSelect: (persona: Persona) => void;
+  customDescription?: string;
+  onPersonaSelect: (persona: Persona, customDescription?: string) => void;
   onContinue: () => void;
   onBack: () => void;
 }
@@ -18,10 +20,29 @@ interface PersonaGridProps {
 export function PersonaGrid({
   personas,
   selectedPersona,
+  customDescription,
   onPersonaSelect,
   onContinue,
   onBack,
 }: PersonaGridProps) {
+  const [showCustomDialog, setShowCustomDialog] = useState(false);
+
+  const handlePersonaClick = (persona: Persona) => {
+    if (persona.type === 'custom') {
+      setShowCustomDialog(true);
+    } else {
+      onPersonaSelect(persona);
+    }
+  };
+
+  const handleCustomSubmit = (description: string) => {
+    const customPersona = personas.find((p) => p.type === 'custom');
+    if (customPersona) {
+      onPersonaSelect(customPersona, description);
+    }
+    setShowCustomDialog(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -57,7 +78,8 @@ export function PersonaGrid({
               <PersonaCard
                 persona={persona}
                 isSelected={selectedPersona?.type === persona.type}
-                onSelect={onPersonaSelect}
+                customDescription={persona.type === 'custom' ? customDescription : undefined}
+                onSelect={handlePersonaClick}
               />
             </motion.div>
           ))}
@@ -97,6 +119,13 @@ export function PersonaGrid({
           </motion.p>
         )}
       </div>
+
+      {/* Custom Persona Dialog */}
+      <CustomPersonaDialog
+        isOpen={showCustomDialog}
+        onClose={() => setShowCustomDialog(false)}
+        onSubmit={handleCustomSubmit}
+      />
     </div>
   );
 }

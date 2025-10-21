@@ -3,7 +3,7 @@ import { ChatState, Message, PersonaType } from '@/types';
 import { generateId } from '@/lib/utils/formatters';
 import axios from 'axios';
 
-export function useChat(personaType: PersonaType, sessionId: string) {
+export function useChat(personaType: PersonaType, sessionId: string, customPersonaDescription?: string) {
   const [state, setState] = useState<ChatState>({
     conversationId: null,
     messages: [],
@@ -76,6 +76,7 @@ export function useChat(personaType: PersonaType, sessionId: string) {
           conversationId: state.conversationId,
           personaType,
           message: content.trim(),
+          ...(customPersonaDescription && { customPersonaDescription }),
         });
 
         const { data } = response.data;

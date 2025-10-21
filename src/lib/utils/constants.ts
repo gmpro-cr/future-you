@@ -50,6 +50,13 @@ export const PERSONAS: Persona[] = [
     emoji: '⚖️',
     toneAttributes: ['gentle', 'reflective', 'insightful'],
   },
+  {
+    type: 'custom',
+    name: 'Create Your Own',
+    description: 'Imagine and describe your unique future self',
+    emoji: '✨',
+    toneAttributes: ['personalized', 'unique', 'yours'],
+  },
 ];
 
 export const APP_CONFIG = {
