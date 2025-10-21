@@ -23,7 +23,7 @@ export function getPersonaPrompt(
   customDescription?: string
 ): string {
   if (personaType === 'custom' && customDescription) {
-    return `You are the user's future self. ${customDescription}\n\nSpeak in first person as "I" (meaning the user's future self). Be empathetic and supportive. Give specific, actionable advice based on experiences. Keep responses under 150 words.`;
+    return `You are the user's future self. ${customDescription}\n\nSpeak in first person. Keep responses SHORT (2-4 sentences) unless asked for details.`;
   }
 
   return PERSONA_PROMPTS[personaType];

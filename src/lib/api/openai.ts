@@ -47,6 +47,8 @@ export async function generateChatResponse(
 
 ${contextMessages ? `Previous conversation:\n${contextMessages}\n\n` : ''}Question: ${userMessage}
 
+IMPORTANT: Keep your response brief and conversational (2-4 sentences max). Only give longer answers if the user specifically asks for detailed advice.
+
 Answer:`;
 
     // Generate response using simple string format
