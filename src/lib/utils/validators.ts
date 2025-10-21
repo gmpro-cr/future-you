@@ -15,7 +15,7 @@ export const personaTypeSchema = z.enum([
 
 export const chatRequestSchema = z.object({
   sessionId: z.string().min(1, 'Session ID is required'),
-  conversationId: z.string().uuid().optional(),
+  conversationId: z.string().uuid().nullable().optional(),
   personaType: personaTypeSchema,
   customPersonaDescription: z.string().max(300).optional(),
   message: z

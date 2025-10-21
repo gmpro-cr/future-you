@@ -6,7 +6,7 @@ import {
   getConversationHistory,
 } from '@/lib/api/supabase';
 import { moderateContent, generateChatResponse } from '@/lib/api/openai';
-import { checkRateLimit } from '@/lib/api/redis';
+// import { checkRateLimit } from '@/lib/api/redis'; // Disabled for now
 import { chatRequestSchema, validateInput } from '@/lib/utils/validators';
 import { getPersonaPrompt } from '@/lib/prompts';
 import {
@@ -24,11 +24,11 @@ export async function POST(req: NextRequest) {
     // Validate input
     const validated = validateInput(chatRequestSchema, body);
 
-    // Check rate limit
-    const rateLimitResult = await checkRateLimit(validated.sessionId);
-    if (!rateLimitResult.success) {
-      throw new RateLimitError(rateLimitResult.reset);
-    }
+    // Rate limiting disabled (Upstash not configured)
+    // const rateLimitResult = await checkRateLimit(validated.sessionId);
+    // if (!rateLimitResult.success) {
+    //   throw new RateLimitError(rateLimitResult.reset);
+    // }
 
     // Content moderation
     const isFlagged = await moderateContent(validated.message);
