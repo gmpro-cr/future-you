@@ -25,28 +25,28 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Black and White */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f5f5f5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00bfa6;
+  background: #525252;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00a88f;
+  background: #171717;
 }
 
-/* Focus visible for accessibility */
+/* Focus visible for accessibility - Black and White */
 *:focus-visible {
-  outline: 2px solid #00bfa6;
+  outline: 2px solid #000000;
   outline-offset: 2px;
 }
 

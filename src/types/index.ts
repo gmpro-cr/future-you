@@ -1,22 +1,12 @@
 // Core type definitions for Future You application
 
-export type PersonaType =
-  | 'entrepreneur'
-  | 'mindful'
-  | 'visionary'
-  | 'creative'
-  | 'wealthy'
-  | 'ias_officer'
-  | 'balanced'
-  | 'custom';
-
 export interface Persona {
-  type: PersonaType;
+  id: string;
   name: string;
   description: string;
-  emoji: string;
-  toneAttributes: string[];
-  systemPrompt?: string;
+  systemPrompt: string;
+  emoji?: string;
+  createdAt: string;
 }
 
 export interface Message {
@@ -30,8 +20,7 @@ export interface Message {
 export interface Conversation {
   id: string;
   title?: string;
-  personaType: PersonaType;
-  customPersonaDescription?: string;
+  personaId?: string;
   messages: Message[];
   createdAt: string;
   updatedAt: string;
@@ -58,8 +47,7 @@ export interface ApiResponse<T> {
 export interface ChatRequest {
   sessionId: string;
   conversationId?: string;
-  personaType: PersonaType;
-  customPersonaDescription?: string;
+  personaId?: string;
   message: string;
 }
 
@@ -67,7 +55,6 @@ export interface ChatResponse {
   conversationId: string;
   messageId: string;
   response: string;
-  personaType: string;
   timestamp: string;
   tokenUsage: {
     prompt: number;

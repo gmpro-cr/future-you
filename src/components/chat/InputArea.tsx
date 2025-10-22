@@ -50,9 +50,9 @@ export function InputArea({ onSendMessage, isLoading, disabled = false }: InputA
   const isNearLimit = characterCount > maxCharacters * 0.9;
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="relative">
+    <div className="bg-white p-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="relative flex items-center gap-2">
           <textarea
             ref={textareaRef}
             value={message}
@@ -63,40 +63,26 @@ export function InputArea({ onSendMessage, isLoading, disabled = false }: InputA
             maxLength={maxCharacters}
             rows={1}
             className={cn(
-              'w-full resize-none rounded-2xl border border-gray-300',
-              'px-4 py-3 pr-32 focus:outline-none focus:ring-2',
-              'focus:ring-teal-500 focus:border-transparent',
+              'flex-1 resize-none rounded-2xl border border-gray-200',
+              'px-4 py-3 focus:outline-none focus:ring-2',
+              'focus:ring-gray-300 focus:border-transparent bg-white',
               'disabled:bg-gray-100 disabled:cursor-not-allowed',
               'max-h-32 overflow-y-auto text-sm sm:text-base'
             )}
           />
 
-          <div className="absolute right-2 bottom-2 flex items-center gap-2">
-            <span
-              className={cn(
-                'text-xs transition-colors',
-                isNearLimit ? 'text-red-500 font-semibold' : 'text-gray-400'
-              )}
-            >
-              {characterCount}/{maxCharacters}
-            </span>
-
-            <Button
-              onClick={handleSend}
-              disabled={!message.trim() || isLoading || disabled}
-              size="sm"
-              className="rounded-xl min-w-[80px]"
-            >
-              {isLoading ? (
-                'Sending...'
-              ) : (
-                <>
-                  <Send className="w-4 h-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Send</span>
-                </>
-              )}
-            </Button>
-          </div>
+          <Button
+            onClick={handleSend}
+            disabled={!message.trim() || isLoading || disabled}
+            size="sm"
+            className="rounded-xl self-end"
+          >
+            {isLoading ? (
+              <span className="text-sm">Sending...</span>
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+          </Button>
         </div>
 
         {/* Helper text */}

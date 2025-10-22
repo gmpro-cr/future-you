@@ -1,23 +1,11 @@
 import { z } from 'zod';
-import { PersonaType } from '@/types';
 import { APP_CONFIG } from './constants';
-
-export const personaTypeSchema = z.enum([
-  'entrepreneur',
-  'mindful',
-  'visionary',
-  'creative',
-  'wealthy',
-  'ias_officer',
-  'balanced',
-  'custom',
-]);
 
 export const chatRequestSchema = z.object({
   sessionId: z.string().min(1, 'Session ID is required'),
   conversationId: z.string().uuid().nullable().optional(),
-  personaType: personaTypeSchema,
-  customPersonaDescription: z.string().max(300).optional(),
+  personaId: z.string().optional(),
+  personaPrompt: z.string().max(2000).optional(),
   message: z
     .string()
     .min(1, 'Message cannot be empty')

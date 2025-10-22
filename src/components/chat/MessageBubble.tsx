@@ -23,10 +23,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       <div className="max-w-[75%] sm:max-w-[70%]">
         <div
           className={cn(
-            'rounded-2xl px-4 py-3 shadow-md',
+            'rounded-2xl px-4 py-3 shadow-sm',
             isUser
-              ? 'bg-white text-gray-900 rounded-br-sm'
-              : 'bg-gradient-to-r from-teal-500 to-indigo-500 text-white rounded-bl-sm'
+              ? 'bg-gray-100 text-gray-900 rounded-br-sm'
+              : 'bg-white border border-gray-200 text-gray-900 rounded-bl-sm'
           )}
         >
           <p className="whitespace-pre-wrap break-words text-sm sm:text-base leading-relaxed">

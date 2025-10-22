@@ -9,29 +9,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        teal: {
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#00BFA6',
-          600: '#00a88f',
-          700: '#008f78',
-          800: '#007561',
-          900: '#005e4e',
+        // Black and white theme
+        primary: {
+          DEFAULT: '#000000',
+          light: '#1a1a1a',
+          dark: '#000000',
         },
-        indigo: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#3B82F6',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
+        secondary: {
+          DEFAULT: '#ffffff',
+          light: '#f5f5f5',
+          dark: '#e5e5e5',
+        },
+        gray: {
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0a0a0a',
         },
       },
       fontFamily: {

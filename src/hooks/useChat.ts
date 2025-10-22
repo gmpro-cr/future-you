@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChatState, Message, PersonaType } from '@/types';
+import { ChatState, Message } from '@/types';
 import { generateId } from '@/lib/utils/formatters';
+import { getPersonaById } from '@/lib/utils/personas';
 import axios from 'axios';
 
-export function useChat(personaType: PersonaType, sessionId: string, customPersonaDescription?: string) {
+export function useChat(sessionId: string, personaId?: string) {
   const [state, setState] = useState<ChatState>({
     conversationId: null,
     messages: [],
@@ -11,11 +12,13 @@ export function useChat(personaType: PersonaType, sessionId: string, customPerso
     error: null,
   });
 
+  const storageKey = personaId ? `conversation_${personaId}` : 'conversation_main';
+
   // Load conversation from localStorage on mount
   useEffect(() => {
     const loadConversation = () => {
       try {
-        const saved = localStorage.getItem(`conversation_${personaType}`);
+        const saved = localStorage.getItem(storageKey);
         if (saved) {
           const parsed = JSON.parse(saved);
           setState((prev) => ({
@@ -32,14 +35,14 @@ export function useChat(personaType: PersonaType, sessionId: string, customPerso
     if (sessionId) {
       loadConversation();
     }
-  }, [personaType, sessionId]);
+  }, [sessionId, storageKey]);
 
   // Save conversation to localStorage whenever it changes
   useEffect(() => {
     if (state.messages.length > 0) {
       try {
         localStorage.setItem(
-          `conversation_${personaType}`,
+          storageKey,
           JSON.stringify({
             conversationId: state.conversationId,
             messages: state.messages,
@@ -49,7 +52,7 @@ export function useChat(personaType: PersonaType, sessionId: string, customPerso
         console.error('Error saving conversation:', error);
       }
     }
-  }, [state.messages, state.conversationId, personaType]);
+  }, [state.messages, state.conversationId, storageKey]);
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -71,12 +74,14 @@ export function useChat(personaType: PersonaType, sessionId: string, customPerso
       }));
 
       try {
+        const persona = personaId ? getPersonaById(personaId) : null;
+
         const response = await axios.post('/api/chat', {
           sessionId,
           conversationId: state.conversationId,
-          personaType,
+          personaId,
+          personaPrompt: persona?.systemPrompt,
           message: content.trim(),
-          ...(customPersonaDescription && { customPersonaDescription }),
         });
 
         const { data } = response.data;
@@ -117,7 +122,7 @@ export function useChat(personaType: PersonaType, sessionId: string, customPerso
         }));
       }
     },
-    [sessionId, state.conversationId, personaType]
+    [sessionId, state.conversationId, personaId]
   );
 
   const clearConversation = useCallback(() => {
@@ -127,8 +132,8 @@ export function useChat(personaType: PersonaType, sessionId: string, customPerso
       isLoading: false,
       error: null,
     });
-    localStorage.removeItem(`conversation_${personaType}`);
-  }, [personaType]);
+    localStorage.removeItem(storageKey);
+  }, [storageKey]);
 
   const clearError = useCallback(() => {
     setState((prev) => ({ ...prev, error: null }));

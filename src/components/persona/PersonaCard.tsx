@@ -2,79 +2,69 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Trash2, Edit2, MessageCircle } from 'lucide-react';
 import { Persona } from '@/types';
-import { cn } from '@/lib/utils/formatters';
+import { getPersonaAvatar, getPersonaColor } from '@/lib/utils/personaAvatars';
 
 interface PersonaCardProps {
   persona: Persona;
-  isSelected: boolean;
-  customDescription?: string;
   onSelect: (persona: Persona) => void;
+  onEdit?: (persona: Persona) => void;
+  onDelete?: (persona: Persona) => void;
 }
 
-export function PersonaCard({ persona, isSelected, customDescription, onSelect }: PersonaCardProps) {
-  const displayDescription = persona.type === 'custom' && customDescription
-    ? customDescription
-    : persona.description;
+export function PersonaCard({ persona, onSelect, onEdit, onDelete }: PersonaCardProps) {
+  const avatarUrl = getPersonaAvatar(persona.name);
 
   return (
-    <motion.button
-      whileHover={{ scale: 1.05, y: -5 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => onSelect(persona)}
-      className={cn(
-        'relative p-6 rounded-2xl border-3 transition-all duration-300',
-        'bg-white shadow-lg hover:shadow-2xl text-left w-full min-h-[200px]',
-        'focus:outline-none focus:ring-2 focus:ring-offset-2',
-        persona.type === 'custom'
-          ? 'focus:ring-purple-500 border-dashed'
-          : 'focus:ring-teal-500',
-        isSelected
-          ? persona.type === 'custom'
-            ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-500'
-            : 'border-teal-500 bg-teal-50 ring-2 ring-teal-500'
-          : 'border-gray-200'
-      )}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
     >
-      {/* Emoji */}
-      <div className="text-5xl mb-4">{persona.emoji}</div>
-
-      {/* Name */}
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">{persona.name}</h3>
-
-      {/* Description */}
-      <p className="text-sm text-gray-600 leading-relaxed">{displayDescription}</p>
-
-      {/* Tags */}
-      <div className="flex flex-wrap gap-2 mt-4">
-        {persona.toneAttributes.map((attribute) => (
-          <span
-            key={attribute}
-            className="text-xs px-2 py-1 rounded-full bg-teal-100 text-teal-700"
-          >
-            {attribute}
-          </span>
-        ))}
+      {/* Avatar & Name & Description */}
+      <div className="flex items-start gap-3 mb-4">
+        <div className="w-12 h-12 rounded-full flex-shrink-0 overflow-hidden border-2 border-gray-200">
+          <img
+            src={avatarUrl}
+            alt={persona.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">{persona.name}</h3>
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{persona.description}</p>
+        </div>
       </div>
 
-      {/* Selected indicator */}
-      <AnimatePresence>
-        {isSelected && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            className="absolute -top-2 -right-2 bg-teal-500 rounded-full p-2 shadow-lg"
+      {/* Actions */}
+      <div className="flex gap-2 mt-4">
+        <button
+          onClick={() => onSelect(persona)}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black hover:bg-gray-800 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          <MessageCircle className="w-4 h-4" />
+          Chat
+        </button>
+        {onEdit && (
+          <button
+            onClick={() => onEdit(persona)}
+            className="p-2 hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors"
+            title="Edit persona"
           >
-            <Check className="w-5 h-5 text-white" />
-          </motion.div>
+            <Edit2 className="w-4 h-4 text-black" />
+          </button>
         )}
-      </AnimatePresence>
-    </motion.button>
+        {onDelete && (
+          <button
+            onClick={() => onDelete(persona)}
+            className="p-2 hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors"
+            title="Delete persona"
+          >
+            <Trash2 className="w-4 h-4 text-gray-700" />
+          </button>
+        )}
+      </div>
+    </motion.div>
   );
-}
-
-function AnimatePresence({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
 }

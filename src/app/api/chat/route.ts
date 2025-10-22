@@ -8,13 +8,14 @@ import {
 import { moderateContent, generateChatResponse } from '@/lib/api/openai';
 // import { checkRateLimit } from '@/lib/api/redis'; // Disabled for now
 import { chatRequestSchema, validateInput } from '@/lib/utils/validators';
-import { getPersonaPrompt } from '@/lib/prompts';
 import {
   handleError,
   RateLimitError,
   ModerationError,
   ValidationError,
 } from '@/lib/middleware/error-handler';
+
+const DEFAULT_SYSTEM_PROMPT = `You are the user's future self who has achieved success and peace. You speak in first person, sharing wisdom from your journey. Keep responses conversational and insightful, typically 2-4 sentences unless asked for details. Be warm, authentic, and encouraging.`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,11 +43,7 @@ export async function POST(req: NextRequest) {
     // Get or create conversation
     let conversationId = validated.conversationId;
     if (!conversationId) {
-      const conversation = await createConversation(
-        session.id,
-        validated.personaType,
-        validated.customPersonaDescription
-      );
+      const conversation = await createConversation(session.id, validated.personaId);
       conversationId = conversation.id;
     }
 
@@ -57,11 +54,11 @@ export async function POST(req: NextRequest) {
       content: msg.content,
     }));
 
-    // Get persona prompt
-    const systemPrompt = getPersonaPrompt(
-      validated.personaType,
-      validated.customPersonaDescription
-    );
+    // Determine system prompt
+    let systemPrompt = DEFAULT_SYSTEM_PROMPT;
+    if (validated.personaPrompt) {
+      systemPrompt = validated.personaPrompt;
+    }
 
     // Generate AI response
     const { response, usage } = await generateChatResponse(
@@ -85,7 +82,6 @@ export async function POST(req: NextRequest) {
         conversationId,
         messageId: assistantMessage.id,
         response,
-        personaType: validated.personaType,
         timestamp: new Date().toISOString(),
         tokenUsage: usage,
       },

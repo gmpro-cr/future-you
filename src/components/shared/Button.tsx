@@ -18,15 +18,15 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantStyles = {
     primary:
-      'bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-600 hover:to-teal-700 shadow-md hover:shadow-lg',
+      'bg-black text-white hover:bg-gray-800 shadow-md hover:shadow-lg',
     secondary:
-      'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700 shadow-md hover:shadow-lg',
+      'bg-gray-800 text-white hover:bg-gray-700 shadow-md hover:shadow-lg',
     outline:
-      'border-2 border-teal-500 text-teal-600 hover:bg-teal-50 active:bg-teal-100',
+      'border-2 border-black text-black hover:bg-gray-50 active:bg-gray-100',
     ghost: 'text-gray-700 hover:bg-gray-100 active:bg-gray-200',
   };
 

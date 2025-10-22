@@ -39,22 +39,27 @@ export async function getOrCreateSession(fingerprint: string) {
   return createSession(fingerprint);
 }
 
-export async function createConversation(
-  sessionId: string,
-  personaType: string,
-  customPersonaDescription?: string
-) {
+export async function createConversation(sessionId: string, personaId?: string) {
+  const insertData = {
+    session_id: sessionId,
+    persona_type: 'custom', // Default value to satisfy NOT NULL constraint
+    custom_persona_description: personaId ? `Custom persona: ${personaId}` : null,
+  };
+
+  console.log('Creating conversation with data:', insertData);
+
   const { data, error } = await supabase
     .from('conversations')
-    .insert({
-      session_id: sessionId,
-      persona_type: personaType,
-      custom_persona_description: customPersonaDescription,
-    })
+    .insert(insertData)
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase insert error:', error);
+    throw error;
+  }
+
+  console.log('Conversation created successfully:', data);
   return data;
 }
 
