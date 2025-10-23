@@ -10,7 +10,6 @@ import { moderateContent, generateChatResponse } from '@/lib/api/openai';
 import { chatRequestSchema, validateInput } from '@/lib/utils/validators';
 import {
   handleError,
-  RateLimitError,
   ModerationError,
   ValidationError,
 } from '@/lib/middleware/error-handler';
