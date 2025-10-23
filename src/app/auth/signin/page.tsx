@@ -51,12 +51,11 @@ export default function SignInPage() {
         <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
       </motion.div>
 
-      <div className="w-full max-w-md relative z-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo/Brand */}
         <div className="text-center mb-8">
