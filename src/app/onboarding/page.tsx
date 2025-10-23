@@ -6,9 +6,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, User } from 'lucide-react';
 import { Button } from '@/components/shared/Button';
 import { saveUserProfile, getUserProfile } from '@/lib/utils/userProfile';
-import { generatePersonaSuggestions } from '@/lib/utils/personaSuggestions';
-import { savePersona } from '@/lib/utils/personas';
 import { createUserSession, isUserLoggedIn } from '@/lib/utils/auth';
+import { FloatingParticles } from '@/components/shared/FloatingParticles';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -43,19 +42,6 @@ export default function OnboardingPage() {
     const userId = `user_${Date.now()}`; // Simple user ID generation
     createUserSession(userId, formData.name);
 
-    // Generate and save suggested personas only if new user
-    const existingProfile = getUserProfile();
-    if (!existingProfile) {
-      const suggestions = generatePersonaSuggestions(formData);
-      suggestions.forEach((suggestion) => {
-        savePersona({
-          name: suggestion.name,
-          description: suggestion.description,
-          systemPrompt: suggestion.systemPrompt,
-        });
-      });
-    }
-
     // Redirect to personas page
     router.push('/personas');
   };
@@ -70,12 +56,41 @@ export default function OnboardingPage() {
   const isFormValid = formData.name && formData.birthdate && formData.country && formData.profession;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-black px-4 py-12 overflow-hidden relative">
+      {/* Animated Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
+          animate={{
+            backgroundPosition: ["0% 0%", "100% 100%"],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
+          style={{ backgroundSize: "200% 200%" }}
+        />
+      </div>
+
+      {/* Floating Particles */}
+      <FloatingParticles />
+
+      {/* Holographic Figure */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center opacity-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.1 }}
+        transition={{ duration: 2 }}
+      >
+        <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
+      </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -83,12 +98,12 @@ export default function OnboardingPage() {
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-full mb-4"
+            className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4"
           >
-            <User className="w-8 h-8 text-white" />
+            <User className="w-8 h-8 text-black" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-black mb-2">Tell Us About Yourself</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-white mb-2">Tell Us About Yourself</h1>
+          <p className="text-white/70">
             Help us personalize your experience
           </p>
         </div>
@@ -99,12 +114,12 @@ export default function OnboardingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-xl p-8 border-2 border-black"
+          className="backdrop-blur-xl bg-black/60 rounded-3xl shadow-2xl p-8 border border-white/20"
         >
           <div className="space-y-5">
             {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
                 Full Name *
               </label>
               <input
@@ -115,13 +130,13 @@ export default function OnboardingPage() {
                 onChange={handleChange}
                 placeholder="Enter your name"
                 required
-                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-2.5 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
               />
             </div>
 
             {/* Birthdate */}
             <div>
-              <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="birthdate" className="block text-sm font-medium text-white mb-2">
                 Date of Birth *
               </label>
               <input
@@ -131,13 +146,13 @@ export default function OnboardingPage() {
                 value={formData.birthdate}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-2.5 bg-white/10 border border-white/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent [color-scheme:dark]"
               />
             </div>
 
             {/* Country */}
             <div>
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="country" className="block text-sm font-medium text-white mb-2">
                 Country *
               </label>
               <select
@@ -146,7 +161,7 @@ export default function OnboardingPage() {
                 value={formData.country}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+                className="w-full px-4 py-2.5 bg-white/10 border border-white/20 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent [&>option]:text-black [&>option]:bg-white"
               >
                 <option value="">Select your country</option>
                 <option value="US">United States</option>
@@ -172,7 +187,7 @@ export default function OnboardingPage() {
 
             {/* Profession */}
             <div>
-              <label htmlFor="profession" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="profession" className="block text-sm font-medium text-white mb-2">
                 Profession *
               </label>
               <input
@@ -183,7 +198,7 @@ export default function OnboardingPage() {
                 onChange={handleChange}
                 placeholder="e.g., Software Engineer, Teacher, Student"
                 required
-                className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-2.5 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
               />
             </div>
           </div>
@@ -193,7 +208,7 @@ export default function OnboardingPage() {
             <Button
               type="submit"
               disabled={!isFormValid}
-              className="w-full bg-black hover:bg-gray-800 text-white flex items-center justify-center gap-2"
+              className="w-full bg-white hover:bg-white/90 text-black flex items-center justify-center gap-2"
               size="lg"
             >
               Continue
@@ -207,7 +222,7 @@ export default function OnboardingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="text-center text-xs text-gray-500 mt-6"
+          className="text-center text-xs text-white/50 mt-6"
         >
           Your information is stored securely and never shared
         </motion.p>

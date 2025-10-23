@@ -31,44 +31,89 @@ export async function generateChatResponse(
   messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
   userMessage: string
 ) {
-  try {
-    // Use Gemini 2.5 Flash model (fast and efficient) - exact name from API
-    const model = genAI.getGenerativeModel({ model: 'models/gemini-2.5-flash-preview-05-20' });
+  const maxRetries = 3;
+  let lastError: any;
 
-    // Build conversation context from history
-    const contextMessages = messages
-      .filter((msg) => msg.role !== 'system')
-      .slice(-8) // Keep last 8 messages for context
-      .map((msg) => `${msg.role === 'user' ? 'User' : 'You'}: ${msg.content}`)
-      .join('\n\n');
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log('🤖 Generating response with system prompt:', {
+        attempt,
+        systemPromptLength: systemPrompt.length,
+        systemPromptPreview: systemPrompt.substring(0, 150) + '...',
+        messageHistoryCount: messages.length,
+        userMessage: userMessage.substring(0, 100),
+      });
 
-    // Combine system prompt, history, and user message
-    const fullPrompt = `${systemPrompt}
+      // Use Gemini Flash model
+      const model = genAI.getGenerativeModel({
+        model: 'models/gemini-2.0-flash-exp'
+      });
 
-${contextMessages ? `Previous conversation:\n${contextMessages}\n\n` : ''}Question: ${userMessage}
+      // Build conversation context from history
+      const contextMessages = messages
+        .filter((msg) => msg.role !== 'system')
+        .slice(-8) // Keep last 8 messages for context
+        .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+        .join('\n\n');
 
-IMPORTANT: Keep your response brief and conversational (2-4 sentences max). Only give longer answers if the user specifically asks for detailed advice.
+      // Create comprehensive prompt with system instructions embedded
+      const fullPrompt = `===CRITICAL ROLE-PLAY INSTRUCTIONS===
+YOU ARE NOW PLAYING A SPECIFIC CHARACTER. THIS IS MANDATORY.
 
-Answer:`;
+CHARACTER DEFINITION:
+${systemPrompt}
 
-    // Generate response using simple string format
-    const result = await model.generateContent(fullPrompt);
-    const responseText = result.response.text();
+===ABSOLUTE RULES===
+1. You MUST respond ONLY as this character
+2. You MUST use the speaking style, tone, and personality described above
+3. You MUST never say "I'm an AI" or break character
+4. You MUST embody this persona completely in EVERY single response
+5. Even when answering simple questions like "hi" or "how are you", respond AS THIS CHARACTER
 
-    // Gemini doesn't provide detailed token counts like OpenAI
-    // Estimate based on text length
-    const estimatedTokens = Math.ceil(responseText.length / 4);
+${contextMessages ? `===PREVIOUS CONVERSATION===\n${contextMessages}\n\n` : ''}===USER'S MESSAGE===
+${userMessage}
 
-    return {
-      response: responseText,
-      usage: {
-        prompt: estimatedTokens,
-        completion: estimatedTokens,
-        total: estimatedTokens * 2,
-      },
-    };
-  } catch (error) {
-    console.error('Gemini API error:', error);
-    throw new Error('Failed to generate response from Gemini API');
+===YOUR RESPONSE (AS THE CHARACTER DESCRIBED ABOVE)===
+Remember: Respond as the character! Stay in character! Use their voice, personality, and perspective!`;
+
+      // Generate response
+      const result = await model.generateContent(fullPrompt);
+      const responseText = result.response.text();
+
+      // Gemini doesn't provide detailed token counts like OpenAI
+      // Estimate based on text length
+      const estimatedTokens = Math.ceil(responseText.length / 4);
+
+      console.log(`✅ Response generated successfully on attempt ${attempt}`);
+
+      return {
+        response: responseText,
+        usage: {
+          prompt: estimatedTokens,
+          completion: estimatedTokens,
+          total: estimatedTokens * 2,
+        },
+      };
+    } catch (error: any) {
+      lastError = error;
+
+      // Check if it's a 503 Service Unavailable error (model overloaded)
+      const isOverloaded = error?.status === 503 ||
+                          error?.message?.includes('overloaded') ||
+                          error?.message?.includes('503');
+
+      if (isOverloaded && attempt < maxRetries) {
+        const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // Exponential backoff: 1s, 2s, 4s
+        console.log(`⏳ Model overloaded, retrying in ${waitTime}ms (attempt ${attempt}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      // If it's not an overload error or we've exhausted retries, throw
+      console.error('Gemini API error:', error);
+      break;
+    }
   }
+
+  throw new Error('Failed to generate response from Gemini API. The model may be temporarily overloaded. Please try again in a moment.');
 }

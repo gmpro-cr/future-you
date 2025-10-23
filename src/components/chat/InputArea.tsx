@@ -50,43 +50,46 @@ export function InputArea({ onSendMessage, isLoading, disabled = false }: InputA
   const isNearLimit = characterCount > maxCharacters * 0.9;
 
   return (
-    <div className="bg-white p-4">
+    <div className="p-4 sm:p-6">
       <div className="max-w-3xl mx-auto">
-        <div className="relative flex items-center gap-2">
+        <div className="relative flex items-end bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 focus-within:ring-2 focus-within:ring-white/50 focus-within:border-transparent">
           <textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message... (Shift+Enter for new line)"
+            placeholder="Type your message..."
             disabled={disabled || isLoading}
             maxLength={maxCharacters}
             rows={1}
             className={cn(
-              'flex-1 resize-none rounded-2xl border border-gray-200',
-              'px-4 py-3 focus:outline-none focus:ring-2',
-              'focus:ring-gray-300 focus:border-transparent bg-white',
-              'disabled:bg-gray-100 disabled:cursor-not-allowed',
-              'max-h-32 overflow-y-auto text-sm sm:text-base'
+              'flex-1 resize-none bg-transparent',
+              'px-4 py-2.5 focus:outline-none',
+              'disabled:cursor-not-allowed',
+              'max-h-32 overflow-y-auto text-sm sm:text-base text-white placeholder-white/50'
             )}
           />
 
-          <Button
+          <button
             onClick={handleSend}
             disabled={!message.trim() || isLoading || disabled}
-            size="sm"
-            className="rounded-xl self-end"
+            className={cn(
+              'p-2 m-1 rounded-lg transition-all flex-shrink-0',
+              !message.trim() || isLoading || disabled
+                ? 'bg-white/20 text-white/50 cursor-not-allowed'
+                : 'bg-white text-black hover:bg-white/90'
+            )}
           >
             {isLoading ? (
-              <span className="text-sm">Sending...</span>
+              <span className="text-xs px-1">...</span>
             ) : (
               <Send className="w-4 h-4" />
             )}
-          </Button>
+          </button>
         </div>
 
         {/* Helper text */}
-        <p className="text-xs text-gray-500 mt-2 text-center">
+        <p className="text-xs text-white/50 mt-2 text-center">
           Press Enter to send, Shift+Enter for new line
         </p>
       </div>

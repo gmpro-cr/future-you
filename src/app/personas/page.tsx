@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Plus, ArrowLeft, Sparkles, LogOut } from 'lucide-react';
+import { Plus, Sparkles, LogOut, User, Calendar, Briefcase, MapPin } from 'lucide-react';
 import { Persona } from '@/types';
-import { getPersonas, savePersona, updatePersona, deletePersona } from '@/lib/utils/personas';
+import { getPersonas, savePersona, updatePersona, deletePersona, migratePersonasWithAvatars } from '@/lib/utils/personas';
 import { PersonaCard } from '@/components/persona/PersonaCard';
 import { PersonaForm } from '@/components/persona/PersonaForm';
 import { Button } from '@/components/shared/Button';
 import { ConfirmModal } from '@/components/shared/Modal';
 import { getUserProfile } from '@/lib/utils/userProfile';
 import { logout, isUserLoggedIn } from '@/lib/utils/auth';
+import { FloatingParticles } from '@/components/shared/FloatingParticles';
 
 export default function PersonasPage() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function PersonasPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingPersona, setEditingPersona] = useState<Persona | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Persona | null>(null);
-  const [userName, setUserName] = useState<string>('');
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -28,10 +29,13 @@ export default function PersonasPage() {
       return;
     }
 
+    // Migrate existing personas to add avatars
+    migratePersonasWithAvatars();
+
     loadPersonas();
     const profile = getUserProfile();
     if (profile) {
-      setUserName(profile.name);
+      setUserProfile(profile);
     }
   }, [router]);
 
@@ -74,128 +78,246 @@ export default function PersonasPage() {
 
   if (showForm) {
     return (
-      <div className="min-h-screen bg-white py-8 px-4 flex items-center justify-center">
-        <PersonaForm
-          onSubmit={handleCreatePersona}
-          onCancel={() => setShowForm(false)}
-        />
+      <div className="min-h-screen bg-black py-8 px-4 flex items-center justify-center relative overflow-hidden">
+        {/* Animated Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
+            animate={{
+              backgroundPosition: ["0% 0%", "100% 100%"],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            style={{ backgroundSize: "200% 200%" }}
+          />
+        </div>
+        <FloatingParticles />
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center opacity-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.1 }}
+          transition={{ duration: 2 }}
+        >
+          <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
+        </motion.div>
+        <div className="relative z-10">
+          <PersonaForm
+            onSubmit={handleCreatePersona}
+            onCancel={() => setShowForm(false)}
+          />
+        </div>
       </div>
     );
   }
 
   if (editingPersona) {
     return (
-      <div className="min-h-screen bg-white py-8 px-4 flex items-center justify-center">
-        <PersonaForm
-          initialData={editingPersona}
-          onSubmit={handleUpdatePersona}
-          onCancel={() => setEditingPersona(null)}
-        />
+      <div className="min-h-screen bg-black py-8 px-4 flex items-center justify-center relative overflow-hidden">
+        {/* Animated Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
+            animate={{
+              backgroundPosition: ["0% 0%", "100% 100%"],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            style={{ backgroundSize: "200% 200%" }}
+          />
+        </div>
+        <FloatingParticles />
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center opacity-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.1 }}
+          transition={{ duration: 2 }}
+        >
+          <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
+        </motion.div>
+        <div className="relative z-10">
+          <PersonaForm
+            initialData={editingPersona}
+            onSubmit={handleUpdatePersona}
+            onCancel={() => setEditingPersona(null)}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-black flex relative overflow-hidden">
+      {/* Animated Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.push('/')}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Home
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-          {userName && (
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-5 h-5 text-black" />
-              <p className="text-lg text-gray-600">
-                Welcome, <span className="font-semibold text-black">{userName}</span>!
-              </p>
+          className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
+          animate={{
+            backgroundPosition: ["0% 0%", "100% 100%"],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
+          style={{ backgroundSize: "200% 200%" }}
+        />
+      </div>
+      <FloatingParticles />
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center opacity-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.1 }}
+        transition={{ duration: 2 }}
+      >
+        <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
+      </motion.div>
+
+      {/* Left Profile Panel */}
+      <motion.div
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        className="w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col relative z-10"
+      >
+        {/* Profile Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+              <User className="w-8 h-8 text-black" />
             </div>
-          )}
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Your Personas
-          </h1>
-          <p className="text-gray-600">
-            {personas.length > 0
-              ? "We've created personalized personas based on your profile. Select one to start chatting!"
-              : "Create custom AI personas tailored to your goals"}
-          </p>
-        </motion.div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-white">
+                {userProfile?.name || 'User'}
+              </h2>
+              <p className="text-sm text-white/70">Your Profile</p>
+            </div>
+          </div>
+        </div>
 
-        {/* Create Button */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="mb-6"
+        {/* Profile Details */}
+        {userProfile && (
+          <div className="space-y-4 mb-6 flex-1">
+            <div className="flex items-start gap-3">
+              <Briefcase className="w-5 h-5 text-white/70 mt-0.5" />
+              <div>
+                <p className="text-xs text-white/50 uppercase font-medium">Profession</p>
+                <p className="text-sm text-white font-medium">{userProfile.profession}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Calendar className="w-5 h-5 text-white/70 mt-0.5" />
+              <div>
+                <p className="text-xs text-white/50 uppercase font-medium">Date of Birth</p>
+                <p className="text-sm text-white font-medium">
+                  {new Date(userProfile.birthdate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <MapPin className="w-5 h-5 text-white/70 mt-0.5" />
+              <div>
+                <p className="text-xs text-white/50 uppercase font-medium">Country</p>
+                <p className="text-sm text-white font-medium">{userProfile.country}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-lg hover:bg-white/20 transition-colors text-white font-medium"
         >
-          <Button
-            onClick={() => setShowForm(true)}
-            className="bg-black hover:bg-gray-800 text-white"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Create New Persona
-          </Button>
-        </motion.div>
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+      </motion.div>
 
-        {/* Personas Grid */}
-        {personas.length === 0 ? (
+      {/* Main Content Area */}
+      <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto relative z-10">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-6 h-6 text-white" />
+              <h1 className="text-3xl font-bold text-white">
+                Your Personas
+              </h1>
+            </div>
+            <p className="text-white/70">
+              {personas.length > 0
+                ? "We've created personalized personas based on your profile. Select one to start chatting!"
+                : "Create custom AI personas tailored to your goals"}
+            </p>
+          </motion.div>
+
+          {/* Create Button */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300"
+            transition={{ delay: 0.1 }}
+            className="mb-6"
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No personas yet</h3>
-            <p className="text-gray-600 mb-6">Create your first custom persona to get started</p>
             <Button
               onClick={() => setShowForm(true)}
-              className="bg-black hover:bg-gray-800 text-white"
+              className="bg-white/10 border-2 border-white/20 hover:bg-white/20 text-white font-medium"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Create Persona
+              Create New Persona
             </Button>
           </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
-            {personas.map((persona, index) => (
-              <motion.div
-                key={persona.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * index }}
-              >
-                <PersonaCard
-                  persona={persona}
-                  onSelect={handleSelectPersona}
-                  onEdit={setEditingPersona}
-                  onDelete={setDeleteConfirm}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+
+          {/* Personas Grid */}
+          {personas.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-center py-12 bg-white/5 backdrop-blur-xl rounded-xl border-2 border-dashed border-white/20"
+            >
+              <h3 className="text-lg font-semibold text-white mb-2">No personas yet</h3>
+              <p className="text-white/70">Click the button above to create your first custom persona</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              {personas.map((persona, index) => (
+                <motion.div
+                  key={persona.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                >
+                  <PersonaCard
+                    persona={persona}
+                    onSelect={handleSelectPersona}
+                    onEdit={setEditingPersona}
+                    onDelete={setDeleteConfirm}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </div>
       </div>
 
       {/* Delete Confirmation */}

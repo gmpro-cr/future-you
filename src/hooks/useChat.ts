@@ -76,6 +76,19 @@ export function useChat(sessionId: string, personaId?: string) {
       try {
         const persona = personaId ? getPersonaById(personaId) : null;
 
+        // Debug logging
+        if (persona) {
+          console.log('🎭 CLIENT: Using Persona:', {
+            id: persona.id,
+            name: persona.name,
+            description: persona.description,
+            systemPromptFull: persona.systemPrompt,
+            systemPromptLength: persona.systemPrompt?.length,
+          });
+        } else {
+          console.log('⚠️ CLIENT: No persona found for ID:', personaId);
+        }
+
         const response = await axios.post('/api/chat', {
           sessionId,
           conversationId: state.conversationId,

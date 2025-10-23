@@ -16,7 +16,7 @@ export function Loader({ size = 'md', className }: LoaderProps) {
   return (
     <div className={cn('flex items-center justify-center', className)}>
       <svg
-        className={cn('animate-spin text-teal-500', sizeStyles[size])}
+        className={cn('animate-spin text-white', sizeStyles[size])}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -41,8 +41,9 @@ export function Loader({ size = 'md', className }: LoaderProps) {
 
 export function FullPageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-500 to-indigo-600">
-      <div className="text-center">
+    <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black" />
+      <div className="text-center relative z-10">
         <Loader size="lg" className="mb-4" />
         <p className="text-white text-lg">Loading Future You...</p>
       </div>

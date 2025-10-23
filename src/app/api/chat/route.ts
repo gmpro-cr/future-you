@@ -22,8 +22,21 @@ export async function POST(req: NextRequest) {
     // Get request body
     const body = await req.json();
 
+    console.log('📥 Received chat request:', {
+      hasPersonaId: !!body.personaId,
+      hasPersonaPrompt: !!body.personaPrompt,
+      personaPromptLength: body.personaPrompt?.length || 0,
+      messagePreview: body.message?.substring(0, 50),
+    });
+
     // Validate input
     const validated = validateInput(chatRequestSchema, body);
+
+    console.log('✅ Validated data:', {
+      hasPersonaId: !!validated.personaId,
+      hasPersonaPrompt: !!validated.personaPrompt,
+      personaPromptLength: validated.personaPrompt?.length || 0,
+    });
 
     // Rate limiting disabled (Upstash not configured)
     // const rateLimitResult = await checkRateLimit(validated.sessionId);
@@ -58,6 +71,13 @@ export async function POST(req: NextRequest) {
     let systemPrompt = DEFAULT_SYSTEM_PROMPT;
     if (validated.personaPrompt) {
       systemPrompt = validated.personaPrompt;
+      console.log('🎭 API using custom persona prompt:', {
+        personaId: validated.personaId,
+        promptLength: systemPrompt.length,
+        promptPreview: systemPrompt.substring(0, 100) + '...',
+      });
+    } else {
+      console.log('ℹ️ API using default system prompt');
     }
 
     // Generate AI response

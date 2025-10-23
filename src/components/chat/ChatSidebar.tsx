@@ -12,7 +12,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { getConversations, deleteConversation, type Conversation } from '@/lib/utils/conversations';
-import { getPersonaAvatar, getPersonaColor } from '@/lib/utils/personaAvatars';
+import { generatePersonaAvatar, suggestAvatarStyle, getPersonaColor } from '@/lib/utils/avatarGenerator';
 
 interface ChatSidebarProps {
   currentSessionId: string;
@@ -86,7 +86,7 @@ export function ChatSidebar({ currentSessionId, onNewChat }: ChatSidebarProps) {
       {isMobile && !isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-4 left-4 z-50 p-2 bg-black text-white rounded-lg shadow-lg lg:hidden"
+          className="fixed top-4 left-4 z-50 p-2 bg-white/10 backdrop-blur-xl border border-white/20 text-white rounded-lg shadow-lg lg:hidden"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -113,18 +113,18 @@ export function ChatSidebar({ currentSessionId, onNewChat }: ChatSidebarProps) {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 h-full w-80 bg-white border-r border-gray-200 flex flex-col z-40 lg:relative lg:z-0"
+              className="fixed left-0 top-0 h-full w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 flex flex-col z-40 lg:relative lg:z-0"
             >
               {/* Header */}
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 border-b border-white/10">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Conversations</h2>
+                  <h2 className="text-lg font-semibold text-white">Conversations</h2>
                   {isMobile && (
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="p-1 hover:bg-gray-100 rounded-lg"
+                      className="p-1 hover:bg-white/20 rounded-lg"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-5 h-5 text-white" />
                     </button>
                   )}
                 </div>
@@ -136,7 +136,7 @@ export function ChatSidebar({ currentSessionId, onNewChat }: ChatSidebarProps) {
                       onNewChat();
                       if (isMobile) setIsOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 bg-white text-black rounded-lg hover:bg-white/90 transition-colors"
                   >
                     <Plus className="w-5 h-5" />
                     <span className="font-medium">New Chat</span>
@@ -147,7 +147,7 @@ export function ChatSidebar({ currentSessionId, onNewChat }: ChatSidebarProps) {
                       router.push('/personas');
                       if (isMobile) setIsOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 border-2 border-white/20 rounded-lg hover:bg-white/10 transition-colors text-white"
                   >
                     <Compass className="w-5 h-5" />
                     <span className="font-medium">Discover Personas</span>
@@ -159,29 +159,29 @@ export function ChatSidebar({ currentSessionId, onNewChat }: ChatSidebarProps) {
               <div className="flex-1 overflow-y-auto p-2">
                 {conversations.length === 0 ? (
                   <div className="text-center py-8 px-4">
-                    <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">
+                    <MessageSquare className="w-12 h-12 text-white/30 mx-auto mb-3" />
+                    <p className="text-sm text-white/50">
                       No conversations yet. Start chatting!
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-1">
                     {conversations.map((conversation) => {
-                      const avatarUrl = getPersonaAvatar(conversation.personaName);
+                      const avatarUrl = generatePersonaAvatar(conversation.personaName, 'realistic');
                       const isActive = conversation.id === currentSessionId;
 
                       return (
-                        <button
+                        <div
                           key={conversation.id}
                           onClick={() => handleConversationClick(conversation)}
-                          className={`w-full text-left p-3 rounded-lg transition-colors group relative ${
+                          className={`w-full text-left p-3 rounded-lg transition-colors group relative cursor-pointer ${
                             isActive
-                              ? 'bg-gray-100 border border-gray-300'
-                              : 'hover:bg-gray-50 border border-transparent'
+                              ? 'bg-white/10 border border-white/30'
+                              : 'hover:bg-white/5 border border-transparent'
                           }`}
                         >
                           <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden border-2 border-gray-200">
+                            <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden border-2 border-white/30">
                               <img
                                 src={avatarUrl}
                                 alt={conversation.personaName}
@@ -190,26 +190,26 @@ export function ChatSidebar({ currentSessionId, onNewChat }: ChatSidebarProps) {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-1">
-                                <p className="text-sm font-medium text-gray-900 truncate">
+                                <p className="text-sm font-medium text-white truncate">
                                   {conversation.title}
                                 </p>
                                 <button
                                   onClick={(e) => handleDeleteConversation(e, conversation.id)}
-                                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded transition-opacity"
+                                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/20 rounded transition-opacity"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5 text-gray-500" />
+                                  <Trash2 className="w-3.5 h-3.5 text-white/70" />
                                 </button>
                               </div>
-                              <p className="text-xs text-gray-500 truncate mb-1">
+                              <p className="text-xs text-white/70 truncate mb-1">
                                 {conversation.personaName}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-white/50">
                                 {formatDate(conversation.timestamp)} · {conversation.messageCount}{' '}
                                 messages
                               </p>
                             </div>
                           </div>
-                        </button>
+                        </div>
                       );
                     })}
                   </div>

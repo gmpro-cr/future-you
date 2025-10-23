@@ -6,6 +6,7 @@ export interface Persona {
   description: string;
   systemPrompt: string;
   emoji?: string;
+  avatarUrl?: string;
   createdAt: string;
 }
 

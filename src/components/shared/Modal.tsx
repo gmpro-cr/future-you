@@ -48,7 +48,7 @@ export function Modal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
           />
 
           {/* Modal */}
@@ -58,21 +58,21 @@ export function Modal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2 }}
-              className="bg-white border-2 border-black rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+              className="bg-black/60 backdrop-blur-xl border-2 border-white/20 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
             >
               {/* Header */}
-              <div className="px-6 py-4 border-b-2 border-gray-200">
+              <div className="px-6 py-4 border-b-2 border-white/10">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-                    {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
+                    <h2 className="text-xl font-semibold text-white">{title}</h2>
+                    {description && <p className="text-sm text-white/70 mt-1">{description}</p>}
                   </div>
                   {showCloseButton && (
                     <button
                       onClick={onClose}
-                      className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="p-2 rounded-lg hover:bg-white/20 transition-colors"
                     >
-                      <X className="w-5 h-5 text-gray-500" />
+                      <X className="w-5 h-5 text-white" />
                     </button>
                   )}
                 </div>
