@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { PERSONAS } from '@/lib/utils/constants';
+import { getPersonas } from '@/lib/utils/personas';
 
 export async function GET() {
   return NextResponse.json({
     success: true,
     data: {
-      personas: PERSONAS,
+      personas: getPersonas(),
     },
   });
 }

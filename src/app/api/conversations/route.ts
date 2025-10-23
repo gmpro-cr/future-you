@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getConversationsBySession, getConversationHistory } from '@/lib/api/supabase';
+import { getConversationsBySession } from '@/lib/api/supabase';
 import { handleError } from '@/lib/middleware/error-handler';
 
 export async function GET(req: NextRequest) {

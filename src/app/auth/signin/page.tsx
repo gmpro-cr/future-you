@@ -7,6 +7,9 @@ import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/shared/Button';
 import { FloatingParticles } from '@/components/shared/FloatingParticles';
 
+// Opt out of static generation for this page
+export const dynamic = 'force-dynamic';
+
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();

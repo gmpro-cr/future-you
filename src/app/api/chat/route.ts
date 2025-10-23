@@ -11,7 +11,6 @@ import { chatRequestSchema, validateInput } from '@/lib/utils/validators';
 import {
   handleError,
   ModerationError,
-  ValidationError,
 } from '@/lib/middleware/error-handler';
 
 const DEFAULT_SYSTEM_PROMPT = `You are the user's future self who has achieved success and peace. You speak in first person, sharing wisdom from your journey. Keep responses conversational and insightful, typically 2-4 sentences unless asked for details. Be warm, authentic, and encouraging.`;
@@ -53,10 +52,12 @@ export async function POST(req: NextRequest) {
     const session = await getOrCreateSession(validated.sessionId);
 
     // Get or create conversation
-    let conversationId = validated.conversationId;
-    if (!conversationId) {
+    let conversationId: string;
+    if (!validated.conversationId) {
       const conversation = await createConversation(session.id, validated.personaId);
       conversationId = conversation.id;
+    } else {
+      conversationId = validated.conversationId;
     }
 
     // Get conversation history for context

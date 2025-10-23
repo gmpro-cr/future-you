@@ -4,8 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
-import { Button } from '@/components/shared/Button';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import { isUserLoggedIn, createUserSession } from '@/lib/utils/auth';
 import { FloatingParticles } from '@/components/shared/FloatingParticles';
 
