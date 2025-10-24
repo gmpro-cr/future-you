@@ -97,7 +97,7 @@ function SignInContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            Discover your potential through meaningful AI conversations
+            
           </motion.p>
 
           <motion.div
