@@ -3,7 +3,22 @@ import { Persona } from '@/types';
 // Fetch all personas from API
 export async function getPersonas(): Promise<Persona[]> {
   try {
-    const response = await fetch('/api/personas', {
+    // Get session identifier from localStorage
+    const authSession = typeof window !== 'undefined' ? localStorage.getItem('auth_session') : null;
+    let sessionId = '';
+
+    if (authSession) {
+      try {
+        const session = JSON.parse(authSession);
+        sessionId = session.userId || '';
+      } catch (e) {
+        console.error('Failed to parse auth_session:', e);
+      }
+    }
+
+    console.log('🔍 Fetching personas for session:', sessionId);
+
+    const response = await fetch(`/api/personas?sessionId=${encodeURIComponent(sessionId)}`, {
       cache: 'no-store',
     });
 
@@ -14,6 +29,7 @@ export async function getPersonas(): Promise<Persona[]> {
     const result = await response.json();
 
     if (result.success) {
+      console.log(`✅ Loaded ${result.data.personas.length} personas from API`);
       return result.data.personas;
     }
 
@@ -28,11 +44,25 @@ export async function getPersonas(): Promise<Persona[]> {
 // Create new persona via API
 export async function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): Promise<Persona | null> {
   try {
+    // Get session identifier from localStorage
+    const authSession = typeof window !== 'undefined' ? localStorage.getItem('auth_session') : null;
+    let sessionId = '';
+
+    if (authSession) {
+      try {
+        const session = JSON.parse(authSession);
+        sessionId = session.userId || '';
+      } catch (e) {
+        console.error('Failed to parse auth_session:', e);
+      }
+    }
+
     console.log('📤 Sending persona creation request:', {
       name: persona.name,
       systemPromptLength: persona.systemPrompt?.length,
       description: persona.description,
       emoji: persona.emoji,
+      sessionId,
     });
 
     const response = await fetch('/api/personas', {
@@ -45,6 +75,7 @@ export async function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): P
         systemPrompt: persona.systemPrompt,
         description: persona.description || '',
         emoji: persona.emoji,
+        sessionId,  // Pass session ID for user privacy
       }),
       cache: 'no-store',
     });

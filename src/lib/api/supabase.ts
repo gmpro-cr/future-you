@@ -136,12 +136,18 @@ export async function saveFeedback(
 
 // Persona CRUD operations
 
-export async function getAllPersonas() {
-  const { data, error } = await supabase
+export async function getAllPersonas(sessionIdentifier?: string) {
+  let query = supabase
     .from('personas')
     .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
+    .eq('is_active', true);
+
+  // Filter by session_identifier if provided (for user privacy)
+  if (sessionIdentifier) {
+    query = query.eq('session_identifier', sessionIdentifier);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) throw error;
   return data || [];
@@ -151,7 +157,8 @@ export async function createPersona(
   name: string,
   systemPrompt: string,
   description?: string,
-  emoji?: string
+  emoji?: string,
+  sessionIdentifier?: string
 ) {
   const { data, error } = await supabase
     .from('personas')
@@ -161,6 +168,7 @@ export async function createPersona(
       description: description || '',
       system_prompt: systemPrompt,
       emoji,
+      session_identifier: sessionIdentifier, // For user privacy
     })
     .select()
     .single();

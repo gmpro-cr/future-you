@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllPersonas, createPersona } from '@/lib/api/supabase';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const personas = await getAllPersonas();
+    // Get session identifier from query params or headers
+    const searchParams = req.nextUrl.searchParams;
+    const sessionIdentifier = searchParams.get('sessionId') || req.headers.get('x-session-id');
+
+    console.log('📥 GET /api/personas - sessionId:', sessionIdentifier);
+
+    const personas = await getAllPersonas(sessionIdentifier || undefined);
 
     // Transform to match frontend format
     const transformedPersonas = personas.map((p: any) => ({
@@ -15,6 +21,8 @@ export async function GET() {
       type: p.type,
       createdAt: p.created_at,
     }));
+
+    console.log(`✅ Returning ${transformedPersonas.length} personas for session: ${sessionIdentifier}`);
 
     return NextResponse.json({
       success: true,
@@ -65,8 +73,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Get session identifier from headers or body
+    const sessionIdentifier = req.headers.get('x-session-id') || body.sessionId;
+    console.log('🔑 Session identifier:', sessionIdentifier);
+
     console.log('✅ Validation passed, calling createPersona...');
-    const persona = await createPersona(name, systemPrompt, description, emoji);
+    const persona = await createPersona(name, systemPrompt, description, emoji, sessionIdentifier);
     console.log('✅ Persona created successfully:', persona.id);
 
     return NextResponse.json({
