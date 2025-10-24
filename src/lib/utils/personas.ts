@@ -1,96 +1,113 @@
 import { Persona } from '@/types';
-import { generatePersonaAvatar, suggestAvatarStyle } from './avatarGenerator';
 
-const PERSONAS_STORAGE_KEY = 'custom_personas';
-
-export function getPersonas(): Persona[] {
-  if (typeof window === 'undefined') return [];
-
+// Fetch all personas from API
+export async function getPersonas(): Promise<Persona[]> {
   try {
-    const stored = localStorage.getItem(PERSONAS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    const response = await fetch('/api/personas');
+    const result = await response.json();
+
+    if (result.success) {
+      return result.data.personas;
+    }
+
+    console.error('Failed to fetch personas:', result.error);
+    return [];
   } catch (error) {
-    console.error('Error loading personas:', error);
+    console.error('Error fetching personas:', error);
     return [];
   }
 }
 
-export function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): Persona {
-  // Don't auto-generate avatar - use provided avatar or undefined
-  const avatarUrl = persona.avatarUrl || undefined;
-
-  const newPersona: Persona = {
-    ...persona,
-    avatarUrl,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-  };
-
-  console.log('💾 Saving new persona:', {
-    id: newPersona.id,
-    name: newPersona.name,
-    description: newPersona.description,
-    avatarUrl: newPersona.avatarUrl,
-    systemPromptLength: newPersona.systemPrompt.length,
-    systemPromptPreview: newPersona.systemPrompt.substring(0, 100) + '...',
-  });
-
-  const personas = getPersonas();
-  personas.push(newPersona);
-
-  localStorage.setItem(PERSONAS_STORAGE_KEY, JSON.stringify(personas));
-
-  console.log('✅ Persona saved successfully. Total personas:', personas.length);
-
-  return newPersona;
-}
-
-export function updatePersona(id: string, updates: Partial<Omit<Persona, 'id' | 'createdAt'>>): Persona | null {
-  const personas = getPersonas();
-  const index = personas.findIndex(p => p.id === id);
-
-  if (index === -1) return null;
-
-  personas[index] = { ...personas[index], ...updates };
-  localStorage.setItem(PERSONAS_STORAGE_KEY, JSON.stringify(personas));
-
-  return personas[index];
-}
-
-export function deletePersona(id: string): boolean {
-  const personas = getPersonas();
-  const filtered = personas.filter(p => p.id !== id);
-
-  if (filtered.length === personas.length) return false;
-
-  localStorage.setItem(PERSONAS_STORAGE_KEY, JSON.stringify(filtered));
-  return true;
-}
-
-export function getPersonaById(id: string): Persona | null {
-  const personas = getPersonas();
-  const persona = personas.find(p => p.id === id) || null;
-
-  if (persona) {
-    console.log('📖 Retrieved persona:', {
-      id: persona.id,
-      name: persona.name,
-      hasDescription: !!persona.description,
-      hasSystemPrompt: !!persona.systemPrompt,
-      systemPromptLength: persona.systemPrompt?.length || 0,
+// Create new persona via API
+export async function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): Promise<Persona | null> {
+  try {
+    const response = await fetch('/api/personas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: persona.name,
+        systemPrompt: persona.systemPrompt,
+        description: persona.description || '',
+        emoji: persona.emoji,
+      }),
     });
-  } else {
-    console.warn('⚠️ Persona not found with ID:', id);
-  }
 
-  return persona;
+    const result = await response.json();
+
+    if (result.success) {
+      return result.data.persona;
+    }
+
+    console.error('Failed to create persona:', result.error);
+    return null;
+  } catch (error) {
+    console.error('Error creating persona:', error);
+    return null;
+  }
 }
 
-/**
- * Migrate existing personas to add avatars if they don't have one
- * DISABLED: No longer auto-generating avatars
- */
+// Update persona via API
+export async function updatePersona(
+  id: string,
+  updates: Partial<Omit<Persona, 'id' | 'createdAt'>>
+): Promise<Persona | null> {
+  try {
+    const response = await fetch(`/api/personas/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: updates.name,
+        systemPrompt: updates.systemPrompt,
+        description: updates.description,
+        emoji: updates.emoji,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      return result.data.persona;
+    }
+
+    console.error('Failed to update persona:', result.error);
+    return null;
+  } catch (error) {
+    console.error('Error updating persona:', error);
+    return null;
+  }
+}
+
+// Delete persona via API
+export async function deletePersona(id: string): Promise<boolean> {
+  try {
+    const response = await fetch(`/api/personas/${id}`, {
+      method: 'DELETE',
+    });
+
+    const result = await response.json();
+    return result.success;
+  } catch (error) {
+    console.error('Error deleting persona:', error);
+    return false;
+  }
+}
+
+// Get persona by ID
+export async function getPersonaById(id: string): Promise<Persona | null> {
+  try {
+    const personas = await getPersonas();
+    return personas.find(p => p.id === id) || null;
+  } catch (error) {
+    console.error('Error getting persona by ID:', error);
+    return null;
+  }
+}
+
+// No longer needed - avatars disabled
 export function migratePersonasWithAvatars(): void {
-  // Avatar generation disabled - do nothing
   return;
 }

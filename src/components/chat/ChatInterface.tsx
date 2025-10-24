@@ -27,14 +27,15 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
   const [currentPersona, setCurrentPersona] = useState<Persona | null>(null);
 
   useEffect(() => {
-    // Migrate existing personas to add avatars
-    migratePersonasWithAvatars();
+    const loadPersona = async () => {
+      const personaId = localStorage.getItem('selected_persona_id');
+      if (personaId) {
+        const persona = await getPersonaById(personaId);
+        setCurrentPersona(persona);
+      }
+    };
 
-    const personaId = localStorage.getItem('selected_persona_id');
-    if (personaId) {
-      const persona = getPersonaById(personaId);
-      setCurrentPersona(persona);
-    }
+    loadPersona();
   }, []);
 
   const { messages, isLoading, error, sendMessage, clearConversation } = useChat(sessionId, currentPersona?.id);

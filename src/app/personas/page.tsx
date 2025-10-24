@@ -112,37 +112,30 @@ export default function PersonasPage() {
     loadPersonas();
   }, [router, session, status]);
 
-  const loadPersonas = () => {
-    setPersonas(getPersonas());
+  const loadPersonas = async () => {
+    const fetchedPersonas = await getPersonas();
+    setPersonas(fetchedPersonas);
   };
 
-  const handleCreatePersona = (data: { name: string; systemPrompt: string; emoji?: string }) => {
-    savePersona(data);
-    loadPersonas();
+  const handleCreatePersona = async (data: { name: string; systemPrompt: string; emoji?: string }) => {
+    await savePersona(data);
+    await loadPersonas();
     setShowForm(false);
   };
 
-  const handleUpdatePersona = (data: { name: string; systemPrompt: string; emoji?: string }) => {
+  const handleUpdatePersona = async (data: { name: string; systemPrompt: string; emoji?: string }) => {
     if (editingPersona) {
-      updatePersona(editingPersona.id, data);
-      loadPersonas();
+      await updatePersona(editingPersona.id, data);
+      await loadPersonas();
       setEditingPersona(null);
     }
   };
 
   const handleDeletePersona = async () => {
     if (deleteConfirm) {
-      // Delete from localStorage
-      deletePersona(deleteConfirm.id);
-      loadPersonas();
-
-      // Delete from backend if user is signed in with Google
-      const profile = getUserProfile();
-      if (profile && profile.googleId) {
-        const { deletePersonaFromBackend } = await import('@/lib/utils/sync');
-        await deletePersonaFromBackend(deleteConfirm.id);
-      }
-
+      // Delete from database
+      await deletePersona(deleteConfirm.id);
+      await loadPersonas();
       setDeleteConfirm(null);
     }
   };

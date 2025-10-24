@@ -133,3 +133,69 @@ export async function saveFeedback(
   if (error) throw error;
   return data;
 }
+
+// Persona CRUD operations
+
+export async function getAllPersonas() {
+  const { data, error } = await supabase
+    .from('personas')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function createPersona(
+  name: string,
+  systemPrompt: string,
+  description?: string,
+  emoji?: string
+) {
+  const { data, error } = await supabase
+    .from('personas')
+    .insert({
+      type: 'custom',
+      name,
+      description: description || '',
+      system_prompt: systemPrompt,
+      emoji,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updatePersonaById(
+  id: string,
+  updates: {
+    name?: string;
+    description?: string;
+    system_prompt?: string;
+    emoji?: string;
+  }
+) {
+  const { data, error } = await supabase
+    .from('personas')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deletePersonaById(id: string) {
+  // Soft delete
+  const { error } = await supabase
+    .from('personas')
+    .update({ is_active: false })
+    .eq('id', id);
+
+  if (error) throw error;
+  return true;
+}
