@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Plus, Sparkles, LogOut, User, Calendar, Briefcase, MapPin } from 'lucide-react';
+import { Plus, Sparkles, LogOut, User } from 'lucide-react';
 import { Persona } from '@/types';
 import { getPersonas, savePersona, updatePersona, deletePersona, migratePersonasWithAvatars } from '@/lib/utils/personas';
 import { PersonaCard } from '@/components/persona/PersonaCard';
@@ -281,40 +281,28 @@ export default function PersonasPage() {
           </div>
         </div>
 
-        {/* Profile Details */}
-        {userProfile && (
-          <div className="space-y-4 mb-6 flex-1">
-            <div className="flex items-start gap-3">
-              <Briefcase className="w-5 h-5 text-white/70 mt-0.5" />
-              <div>
-                <p className="text-xs text-white/50 uppercase font-medium">Profession</p>
-                <p className="text-sm text-white font-medium">{userProfile.profession}</p>
+        {/* Recent Personas */}
+        <div className="space-y-4 mb-6 flex-1">
+          <h3 className="text-sm text-white/50 uppercase font-medium mb-3">Recent Interactions</h3>
+          {personas.slice(0, 5).map((persona) => (
+            <div
+              key={persona.id}
+              onClick={() => handleSelectPersona(persona)}
+              className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer transition-colors"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/10 rounded-full flex items-center justify-center">
+                <span className="text-lg">{persona.emoji || '🤖'}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-white font-medium truncate">{persona.name}</p>
+                <p className="text-xs text-white/50">Click to chat</p>
               </div>
             </div>
-
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-white/70 mt-0.5" />
-              <div>
-                <p className="text-xs text-white/50 uppercase font-medium">Date of Birth</p>
-                <p className="text-sm text-white font-medium">
-                  {new Date(userProfile.birthdate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <MapPin className="w-5 h-5 text-white/70 mt-0.5" />
-              <div>
-                <p className="text-xs text-white/50 uppercase font-medium">Country</p>
-                <p className="text-sm text-white font-medium">{userProfile.country}</p>
-              </div>
-            </div>
-          </div>
-        )}
+          ))}
+          {personas.length === 0 && (
+            <p className="text-sm text-white/50 text-center py-4">No personas yet</p>
+          )}
+        </div>
 
         {/* Logout Button */}
         <button
@@ -372,7 +360,7 @@ export default function PersonasPage() {
             <p className="text-sm sm:text-base text-white/70">
               {personas.length > 0
                 ? "Select a persona to start chatting!"
-                : "Create custom AI personas tailored to your goals"}
+                : "create your favourite AI spirit"}
             </p>
           </motion.div>
 

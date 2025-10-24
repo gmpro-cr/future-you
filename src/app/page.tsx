@@ -62,7 +62,7 @@ function SignInContent() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-white" />
-            <span className="text-xl font-semibold text-white">Esperit</span>
+            <span className="text-2xl font-semibold text-white">Esperit</span>
           </div>
         </div>
       </nav>
@@ -83,7 +83,7 @@ function SignInContent() {
         {/* Content */}
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <motion.h1
-            className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}

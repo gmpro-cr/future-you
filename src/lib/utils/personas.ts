@@ -16,13 +16,8 @@ export function getPersonas(): Persona[] {
 }
 
 export function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): Persona {
-  // Auto-generate avatar if not provided (with emoji if available)
-  const avatarUrl = persona.avatarUrl || generatePersonaAvatar(
-    persona.name,
-    suggestAvatarStyle(persona.name, persona.description || ''),
-    persona.description || '',
-    persona.emoji
-  );
+  // Don't auto-generate avatar - use provided avatar or undefined
+  const avatarUrl = persona.avatarUrl || undefined;
 
   const newPersona: Persona = {
     ...persona,
@@ -93,42 +88,9 @@ export function getPersonaById(id: string): Persona | null {
 
 /**
  * Migrate existing personas to add avatars if they don't have one
- * Also regenerates old Pravatar URLs (from i.pravatar.cc) with new avatar styles
- * This should be called when the app loads
+ * DISABLED: No longer auto-generating avatars
  */
 export function migratePersonasWithAvatars(): void {
-  if (typeof window === 'undefined') return;
-
-  const personas = getPersonas();
-  let updated = false;
-
-  const migratedPersonas = personas.map(persona => {
-    // Check if persona needs avatar generation or regeneration
-    const needsNewAvatar = !persona.avatarUrl ||
-                           (persona.avatarUrl && persona.avatarUrl.includes('pravatar.cc'));
-
-    if (needsNewAvatar) {
-      const avatarUrl = generatePersonaAvatar(
-        persona.name,
-        suggestAvatarStyle(persona.name, persona.description || ''),
-        persona.description || '',
-        persona.emoji
-      );
-
-      console.log(`🎨 ${persona.avatarUrl ? 'Regenerating' : 'Adding'} avatar for persona: ${persona.name}`);
-      updated = true;
-
-      return {
-        ...persona,
-        avatarUrl
-      };
-    }
-    return persona;
-  });
-
-  // Only update localStorage if changes were made
-  if (updated) {
-    localStorage.setItem(PERSONAS_STORAGE_KEY, JSON.stringify(migratedPersonas));
-    console.log(`✅ Migrated ${personas.length} personas with new avatars`);
-  }
+  // Avatar generation disabled - do nothing
+  return;
 }
