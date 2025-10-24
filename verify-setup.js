@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Setup Verification Script for Future You
+ * Setup Verification Script for Esperit
  * Run this after executing the database schema in Supabase
  */
 
@@ -19,7 +19,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function verifySetup() {
-  console.log('\n🔍 Verifying Future You Setup...\n');
+  console.log('\n🔍 Verifying Esperit Setup...\n');
 
   // 1. Check Supabase connection
   console.log('1️⃣  Testing Supabase connection...');

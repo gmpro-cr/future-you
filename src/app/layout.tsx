@@ -23,13 +23,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Future You - Talk to Your Future Self',
+  title: 'Esperit - AI-Powered Personal Growth Platform',
   description:
     'Explore your potential through conversations with AI personas. Get guidance on career, life balance, and personal growth tailored for India.',
   keywords: ['AI', 'personal growth', 'career guidance', 'life coaching', 'future self', 'India'],
-  authors: [{ name: 'Future You Team' }],
+  authors: [{ name: 'Esperit Team' }],
   openGraph: {
-    title: 'Future You - Talk to Your Future Self',
+    title: 'Esperit - AI-Powered Personal Growth Platform',
     description:
       'Explore personal growth through meaningful conversations with AI personas representing your aspirational future.',
     type: 'website',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Future You - Talk to Your Future Self',
+    title: 'Esperit - AI-Powered Personal Growth Platform',
     description: 'Explore your potential through AI-powered conversations with your future self.',
   },
   robots: {

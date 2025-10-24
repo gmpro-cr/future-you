@@ -62,7 +62,7 @@ function SignInContent() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-white" />
-            <span className="text-xl font-semibold text-white">Future You</span>
+            <span className="text-xl font-semibold text-white">Esperit</span>
           </div>
         </div>
       </nav>

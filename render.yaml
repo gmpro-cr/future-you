@@ -1,7 +1,7 @@
 services:
-  # Future You - Next.js Web Service
+  # Esperit - Next.js Web Service
   - type: web
-    name: future-you
+    name: esperit
     runtime: node
     region: oregon
     plan: free

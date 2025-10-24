@@ -1,4 +1,4 @@
-# Setup Guide - Future You
+# Setup Guide - Esperit
 
 Complete setup instructions for local development and production deployment.
 
@@ -34,8 +34,8 @@ git --version   # Any recent version
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/future-you.git
-cd future-you
+git clone https://github.com/yourusername/esperit.git
+cd esperit
 ```
 
 ### Step 2: Install Dependencies
@@ -123,7 +123,7 @@ OpenAI provides the GPT-4 Turbo model for conversations.
 
 1. Go to **API Keys**
 2. Click **Create new secret key**
-3. Name it "Future You Development"
+3. Name it "Esperit Development"
 4. Copy the key (you won't see it again!)
 
 ### Step 4: Add to Environment File
@@ -157,7 +157,7 @@ Upstash provides serverless Redis for rate limiting (optional but recommended).
 
 ### Step 2: Configure Database
 
-1. **Name**: `future-you-ratelimit`
+1. **Name**: `esperit-ratelimit`
 2. **Type**: Regional
 3. **Region**: Choose closest to your users (e.g., Mumbai for India)
 4. **TLS**: Enable
@@ -302,6 +302,6 @@ Once setup is complete:
 
 If you encounter issues not covered here:
 
-1. Check GitHub Issues: [github.com/yourusername/future-you/issues](https://github.com/yourusername/future-you/issues)
+1. Check GitHub Issues: [github.com/yourusername/esperit/issues](https://github.com/yourusername/esperit/issues)
 2. Review Next.js docs: [nextjs.org/docs](https://nextjs.org/docs)
-3. Contact support: support@futureyou.in
+3. Contact support: support@esperit.com

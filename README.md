@@ -1,15 +1,15 @@
-# Future You
+# Esperit
 
-**Talk to Your Future Self** - An AI-powered conversational platform for personal growth and self-discovery.
+**Esperit** - An AI-powered conversational platform for personal growth and self-discovery.
 
-![Future You](https://img.shields.io/badge/version-1.0.0-teal)
+![Esperit](https://img.shields.io/badge/version-1.0.0-teal)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Next.js](https://img.shields.io/badge/Next.js-14+-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)
 
 ## Overview
 
-Future You helps individuals explore their potential futures through meaningful conversations with AI personas representing different life paths. From entrepreneurship to mindfulness, users can gain perspective on career decisions, life balance, and personal development.
+Esperit helps individuals explore their potential futures through meaningful conversations with AI personas representing different life paths. From entrepreneurship to mindfulness, users can gain perspective on career decisions, life balance, and personal development.
 
 ### Key Features
 
@@ -43,8 +43,8 @@ Future You helps individuals explore their potential futures through meaningful 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/future-you.git
-   cd future-you
+   git clone https://github.com/yourusername/esperit.git
+   cd esperit
    ```
 
 2. **Install dependencies**
@@ -83,7 +83,7 @@ Future You helps individuals explore their potential futures through meaningful 
 ## Project Structure
 
 ```
-future-you/
+esperit/
 ├── src/
 │   ├── app/              # Next.js pages and API routes
 │   │   ├── api/          # Backend API endpoints
@@ -225,8 +225,8 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 ## Support
 
 For issues and questions:
-- GitHub Issues: [Report a bug](https://github.com/yourusername/future-you/issues)
-- Email: support@futureyou.in
+- GitHub Issues: [Report a bug](https://github.com/yourusername/esperit/issues)
+- Email: support@esperit.com
 
 ## Acknowledgments
 

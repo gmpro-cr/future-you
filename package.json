@@ -1,7 +1,7 @@
 {
-  "name": "future-you",
+  "name": "esperit",
   "version": "1.0.0",
-  "description": "Talk to Your Future Self - AI-powered conversational platform for personal growth",
+  "description": "Esperit - AI-powered conversational platform for personal growth",
   "private": true,
   "scripts": {
     "dev": "next dev",

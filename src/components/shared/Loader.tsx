@@ -45,7 +45,7 @@ export function FullPageLoader() {
       <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black" />
       <div className="text-center relative z-10">
         <Loader size="lg" className="mb-4" />
-        <p className="text-white text-lg">Loading Future You...</p>
+        <p className="text-white text-lg">Loading Esperit...</p>
       </div>
     </div>
   );

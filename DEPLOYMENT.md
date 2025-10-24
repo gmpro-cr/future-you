@@ -1,6 +1,6 @@
-# Deployment Guide - Future You
+# Deployment Guide - Esperit
 
-Complete guide for deploying Future You to production on Vercel.
+Complete guide for deploying Esperit to production on Vercel.
 
 ## Table of Contents
 
@@ -39,7 +39,7 @@ Vercel is the recommended platform for deploying Next.js applications.
 ### Step 2: Import Project
 
 1. Click **Add New** → **Project**
-2. Import your `future-you` repository from GitHub
+2. Import your `esperit` repository from GitHub
 3. Vercel will auto-detect it's a Next.js project
 
 ### Step 3: Configure Project
@@ -81,7 +81,7 @@ NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 
 1. Click **Deploy**
 2. Wait 2-3 minutes for build to complete
-3. You'll get a URL like `https://future-you-xxx.vercel.app`
+3. You'll get a URL like `https://esperit-xxx.vercel.app`
 
 ### Step 6: Verify Deployment
 
@@ -105,7 +105,7 @@ NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Settings → API | Public, safe to expose |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Settings → API | Public, safe to expose |
 | `SUPABASE_SERVICE_KEY` | Supabase Settings → API | **Secret**, server-only |
-| `NEXT_PUBLIC_APP_URL` | Your Vercel URL | E.g., `https://futureyou.in` |
+| `NEXT_PUBLIC_APP_URL` | Your Vercel URL | E.g., `https://esperit.com` |
 
 ### Optional Variables
 
@@ -133,22 +133,22 @@ NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 ### Step 1: Purchase Domain
 
 Recommended registrars for India:
-- Namecheap: futureyou.in
-- GoDaddy: futureyou.co.in
-- Google Domains: futureyou.com
+- Namecheap: esperit.in
+- GoDaddy: esperit.co.in
+- Google Domains: esperit.com
 
 ### Step 2: Add Domain to Vercel
 
 1. Go to Project Settings → Domains
 2. Click **Add**
-3. Enter your domain (e.g., `futureyou.in`)
+3. Enter your domain (e.g., `esperit.com`)
 4. Click **Add**
 
 ### Step 3: Configure DNS
 
 Vercel will show you DNS records to add. Go to your domain registrar and add:
 
-**For root domain (futureyou.in):**
+**For root domain (esperit.com):**
 ```
 Type: A
 Name: @
@@ -175,7 +175,7 @@ TTL: 3600
 Update `NEXT_PUBLIC_APP_URL` to your custom domain:
 
 ```env
-NEXT_PUBLIC_APP_URL=https://futureyou.in
+NEXT_PUBLIC_APP_URL=https://esperit.com
 ```
 
 ## Post-Deployment Verification
@@ -186,13 +186,13 @@ Run these tests after deployment:
 
 1. **Health Check**
    ```bash
-   curl https://futureyou.in/api/health
+   curl https://esperit.com/api/health
    ```
    Expected: `{"success":true,"data":{"status":"healthy"}}`
 
 2. **Personas Endpoint**
    ```bash
-   curl https://futureyou.in/api/personas
+   curl https://esperit.com/api/personas
    ```
    Expected: JSON with 7 personas
 
@@ -391,8 +391,8 @@ npx @next/bundle-analyzer
 For deployment issues:
 - Vercel Support: [vercel.com/support](https://vercel.com/support)
 - Supabase Docs: [supabase.com/docs](https://supabase.com/docs)
-- Project Issues: [GitHub Issues](https://github.com/yourusername/future-you/issues)
+- Project Issues: [GitHub Issues](https://github.com/yourusername/esperit/issues)
 
 ---
 
-**Congratulations!** Your Future You app is now live in production. 🎉
+**Congratulations!** Your Esperit app is now live in production. 🎉
