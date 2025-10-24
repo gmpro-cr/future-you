@@ -78,7 +78,7 @@ function createEmojiAvatar(emoji: string, backgroundColor: string): string {
       </text>
     </svg>
   `;
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
 /**
