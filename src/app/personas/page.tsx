@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Plus, Sparkles, LogOut, User, Calendar, Briefcase, MapPin } from 'lucide-react';
 import { Persona } from '@/types';
@@ -10,12 +11,13 @@ import { PersonaCard } from '@/components/persona/PersonaCard';
 import { PersonaForm } from '@/components/persona/PersonaForm';
 import { Button } from '@/components/shared/Button';
 import { ConfirmModal } from '@/components/shared/Modal';
-import { getUserProfile } from '@/lib/utils/userProfile';
-import { logout, isUserLoggedIn } from '@/lib/utils/auth';
+import { getUserProfile, saveUserProfile } from '@/lib/utils/userProfile';
+import { logout, isUserLoggedIn, createUserSession } from '@/lib/utils/auth';
 import { FloatingParticles } from '@/components/shared/FloatingParticles';
 
 export default function PersonasPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingPersona, setEditingPersona] = useState<Persona | null>(null);
@@ -23,21 +25,57 @@ export default function PersonasPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
-    // Check if user is logged in
-    if (!isUserLoggedIn()) {
+    // Wait for session to load
+    if (status === 'loading') return;
+
+    // Check if user is logged in (either via NextAuth or guest)
+    if (status === 'unauthenticated' && !isUserLoggedIn()) {
       router.push('/');
       return;
+    }
+
+    // Auto-save Google user data if signed in with Google
+    if (session?.user) {
+      const existingProfile = getUserProfile();
+
+      // Only save if profile doesn't exist
+      if (!existingProfile) {
+        const googleUserData = {
+          name: session.user.name || '',
+          email: session.user.email || '',
+          image: session.user.image || '',
+          birthdate: '', // Will remain empty for Google users
+          country: '', // Will remain empty for Google users
+          profession: '', // Will remain empty for Google users
+        };
+
+        saveUserProfile(googleUserData);
+        createUserSession(session.user.id || `google_${Date.now()}`, session.user.name || 'User');
+        console.log('✅ Google user data saved automatically');
+      }
+
+      // Load the profile
+      const profile = getUserProfile();
+      if (profile) {
+        setUserProfile({
+          ...profile,
+          name: profile.name || session.user.name,
+          image: profile.image || session.user.image,
+        });
+      }
+    } else {
+      // Guest user - load existing profile if any
+      const profile = getUserProfile();
+      if (profile) {
+        setUserProfile(profile);
+      }
     }
 
     // Migrate existing personas to add avatars
     migratePersonasWithAvatars();
 
     loadPersonas();
-    const profile = getUserProfile();
-    if (profile) {
-      setUserProfile(profile);
-    }
-  }, [router]);
+  }, [router, session, status]);
 
   const loadPersonas = () => {
     setPersonas(getPersonas());

@@ -14,15 +14,18 @@ interface PersonaCardProps {
 }
 
 export function PersonaCard({ persona, onSelect, onEdit, onDelete }: PersonaCardProps) {
-  // Use stored avatar or generate a new one
+  // Use stored avatar or generate a new one (with emoji if available)
   const avatarUrl = persona.avatarUrl || generatePersonaAvatar(
     persona.name,
-    suggestAvatarStyle(persona.name, persona.description)
+    suggestAvatarStyle(persona.name, persona.description),
+    persona.description,
+    persona.emoji
   );
 
   console.log('PersonaCard render:', {
     name: persona.name,
     hasStoredAvatar: !!persona.avatarUrl,
+    hasEmoji: !!persona.emoji,
     avatarUrl: avatarUrl
   });
 

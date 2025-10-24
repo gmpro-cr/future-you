@@ -1,13 +1,18 @@
 export interface UserProfile {
   name: string;
-  birthdate: string;
-  country: string;
-  profession: string;
+  birthdate?: string; // Optional for Google sign-in users
+  country?: string; // Optional for Google sign-in users
+  profession?: string; // Optional for Google sign-in users
+  email?: string; // For Google sign-in users
+  image?: string; // Profile picture from Google
 }
 
-export const saveUserProfile = (profile: UserProfile): void => {
+export const saveUserProfile = (profile: Partial<UserProfile>): void => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('user_profile', JSON.stringify(profile));
+    // Merge with existing profile to preserve data
+    const existingProfile = getUserProfile();
+    const mergedProfile = { ...existingProfile, ...profile };
+    localStorage.setItem('user_profile', JSON.stringify(mergedProfile));
   }
 };
 

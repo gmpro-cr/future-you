@@ -11,7 +11,7 @@ import { FloatingParticles } from '@/components/shared/FloatingParticles';
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/onboarding';
+  const callbackUrl = searchParams.get('callbackUrl') || '/personas';
 
   // Check if user is already logged in
   useEffect(() => {
@@ -22,7 +22,8 @@ function SignInContent() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn('google', { callbackUrl });
+      // Redirect directly to personas page after Google sign-in
+      await signIn('google', { callbackUrl: '/personas' });
     } catch (error) {
       console.error('Sign in error:', error);
     }

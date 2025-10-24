@@ -167,7 +167,8 @@ export function ChatSidebar({ currentSessionId, onNewChat }: ChatSidebarProps) {
                 ) : (
                   <div className="space-y-1">
                     {conversations.map((conversation) => {
-                      const avatarUrl = generatePersonaAvatar(conversation.personaName, 'realistic');
+                      // Generate avatar from conversation persona name (no emoji available here)
+                      const avatarUrl = generatePersonaAvatar(conversation.personaName, 'realistic', undefined, undefined);
                       const isActive = conversation.id === currentSessionId;
 
                       return (

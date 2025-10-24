@@ -16,10 +16,12 @@ export function getPersonas(): Persona[] {
 }
 
 export function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): Persona {
-  // Auto-generate avatar if not provided
+  // Auto-generate avatar if not provided (with emoji if available)
   const avatarUrl = persona.avatarUrl || generatePersonaAvatar(
     persona.name,
-    suggestAvatarStyle(persona.name, persona.description)
+    suggestAvatarStyle(persona.name, persona.description),
+    persona.description,
+    persona.emoji
   );
 
   const newPersona: Persona = {
@@ -91,6 +93,7 @@ export function getPersonaById(id: string): Persona | null {
 
 /**
  * Migrate existing personas to add avatars if they don't have one
+ * Also regenerates old Pravatar URLs (from i.pravatar.cc) with new avatar styles
  * This should be called when the app loads
  */
 export function migratePersonasWithAvatars(): void {
@@ -100,14 +103,19 @@ export function migratePersonasWithAvatars(): void {
   let updated = false;
 
   const migratedPersonas = personas.map(persona => {
-    // If persona doesn't have an avatar, generate one
-    if (!persona.avatarUrl) {
+    // Check if persona needs avatar generation or regeneration
+    const needsNewAvatar = !persona.avatarUrl ||
+                           (persona.avatarUrl && persona.avatarUrl.includes('pravatar.cc'));
+
+    if (needsNewAvatar) {
       const avatarUrl = generatePersonaAvatar(
         persona.name,
-        suggestAvatarStyle(persona.name, persona.description)
+        suggestAvatarStyle(persona.name, persona.description),
+        persona.description,
+        persona.emoji
       );
 
-      console.log(`🎨 Adding avatar to existing persona: ${persona.name}`);
+      console.log(`🎨 ${persona.avatarUrl ? 'Regenerating' : 'Adding'} avatar for persona: ${persona.name}`);
       updated = true;
 
       return {
@@ -121,6 +129,6 @@ export function migratePersonasWithAvatars(): void {
   // Only update localStorage if changes were made
   if (updated) {
     localStorage.setItem(PERSONAS_STORAGE_KEY, JSON.stringify(migratedPersonas));
-    console.log(`✅ Migrated ${personas.length} personas with avatars`);
+    console.log(`✅ Migrated ${personas.length} personas with new avatars`);
   }
 }

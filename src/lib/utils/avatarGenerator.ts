@@ -30,28 +30,25 @@ function isLikelyRealPerson(name: string, description?: string): boolean {
 
 /**
  * Generate a persona avatar URL
- * Uses photorealistic images for real people, DiceBear for others
+ * Uses illustrated avatars from DiceBear or emoji-based avatars
  */
 export function generatePersonaAvatar(
   personaName: string,
   style: AvatarStyle = 'realistic',
-  description?: string
+  description?: string,
+  emoji?: string
 ): string {
   const seed = encodeURIComponent(personaName);
   const backgroundColor = getColorFromName(personaName);
 
-  // For realistic/professional personas that seem to be real people
-  // Use This Person Does Not Exist style placeholder
-  if ((style === 'realistic' || style === 'professional') && isLikelyRealPerson(personaName, description)) {
-    // Use RoboHash with set5 for photorealistic faces
-    // Or use Lorem Picsum with face filter
-    const nameHash = hashString(personaName);
-    return `https://i.pravatar.cc/400?img=${nameHash % 70}`; // Pravatar has 70 different realistic faces
+  // If emoji is provided, create an emoji-based avatar
+  if (emoji) {
+    return createEmojiAvatar(emoji, backgroundColor);
   }
 
-  // For realistic/professional but generic personas
+  // For realistic/professional personas - use illustrated portrait style
   if (style === 'realistic' || style === 'professional') {
-    return `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=${backgroundColor}&radius=50&size=400`;
+    return `https://api.dicebear.com/7.x/lorelei/svg?seed=${seed}&backgroundColor=${backgroundColor}&radius=50&size=400`;
   }
 
   // For artistic personas, use "personas" for illustrated style
@@ -67,6 +64,21 @@ export function generatePersonaAvatar(
   // Fallback to initials style using UI Avatars
   const textColor = 'ffffff';
   return `https://ui-avatars.com/api/?name=${seed}&size=400&background=${backgroundColor}&color=${textColor}&bold=true&format=svg`;
+}
+
+/**
+ * Create an emoji-based avatar using data URI
+ */
+function createEmojiAvatar(emoji: string, backgroundColor: string): string {
+  const svg = `
+    <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="400" fill="#${backgroundColor}" rx="50"/>
+      <text x="50%" y="50%" text-anchor="middle" dy=".35em" font-size="200" font-family="system-ui, -apple-system, sans-serif">
+        ${emoji}
+      </text>
+    </svg>
+  `;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
 /**
