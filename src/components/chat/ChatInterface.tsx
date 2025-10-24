@@ -15,6 +15,8 @@ import { logout } from '@/lib/utils/auth';
 import { ChatSidebar } from './ChatSidebar';
 import { saveConversation } from '@/lib/utils/conversations';
 import { FloatingParticles } from '@/components/shared/FloatingParticles';
+import { syncConversation } from '@/lib/utils/sync';
+import { getUserProfile } from '@/lib/utils/userProfile';
 
 interface ChatInterfaceProps {
   sessionId: string;
@@ -42,7 +44,19 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
   // Save conversation whenever messages change
   useEffect(() => {
     if (messages.length > 0 && currentPersona) {
+      // Save to localStorage
       saveConversation(sessionId, currentPersona.id, currentPersona.name, messages);
+
+      // Sync to backend if user is signed in with Google
+      const profile = getUserProfile();
+      if (profile && profile.googleId) {
+        // Debounce the sync to avoid too many requests
+        const timeoutId = setTimeout(() => {
+          syncConversation(currentPersona.id, messages);
+        }, 2000); // Wait 2 seconds after last message
+
+        return () => clearTimeout(timeoutId);
+      }
     }
   }, [messages, sessionId, currentPersona]);
 

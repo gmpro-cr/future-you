@@ -14,6 +14,7 @@ import { ConfirmModal } from '@/components/shared/Modal';
 import { getUserProfile, saveUserProfile } from '@/lib/utils/userProfile';
 import { logout, isUserLoggedIn, createUserSession } from '@/lib/utils/auth';
 import { FloatingParticles } from '@/components/shared/FloatingParticles';
+import { performCompleteSync, startAutoSync } from '@/lib/utils/sync';
 
 export default function PersonasPage() {
   const router = useRouter();
@@ -81,6 +82,22 @@ export default function PersonasPage() {
           image: profile.image || session.user.image,
         });
       }
+
+      // Sync data with backend after successful Google sign-in
+      if (profile && profile.googleId) {
+        console.log('🔄 Starting initial sync with backend...');
+        performCompleteSync(true).then((result) => {
+          console.log('✅ Initial sync completed:', result);
+        });
+
+        // Start auto-sync every 5 minutes
+        const syncInterval = startAutoSync(5);
+
+        // Cleanup on unmount
+        return () => {
+          clearInterval(syncInterval);
+        };
+      }
     } else {
       // Guest user - load existing profile if any
       const profile = getUserProfile();
@@ -113,10 +130,19 @@ export default function PersonasPage() {
     }
   };
 
-  const handleDeletePersona = () => {
+  const handleDeletePersona = async () => {
     if (deleteConfirm) {
+      // Delete from localStorage
       deletePersona(deleteConfirm.id);
       loadPersonas();
+
+      // Delete from backend if user is signed in with Google
+      const profile = getUserProfile();
+      if (profile && profile.googleId) {
+        const { deletePersonaFromBackend } = await import('@/lib/utils/sync');
+        await deletePersonaFromBackend(deleteConfirm.id);
+      }
+
       setDeleteConfirm(null);
     }
   };
