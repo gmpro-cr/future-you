@@ -8,20 +8,17 @@ import { Button } from '@/components/shared/Button';
 interface PersonaFormProps {
   onSubmit: (persona: {
     name: string;
-    description: string;
     systemPrompt: string;
   }) => void;
   onCancel: () => void;
   initialData?: {
     name: string;
-    description: string;
     systemPrompt: string;
   };
 }
 
 export function PersonaForm({ onSubmit, onCancel, initialData }: PersonaFormProps) {
   const [name, setName] = useState(initialData?.name || '');
-  const [description, setDescription] = useState(initialData?.description || '');
   const [systemPrompt, setSystemPrompt] = useState(
     initialData?.systemPrompt || `You are [NAME/ROLE]. Respond ONLY as this character would.
 
@@ -44,8 +41,8 @@ Remember: You ARE this character. Not an AI. Respond authentically as they would
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim() && description.trim() && systemPrompt.trim()) {
-      onSubmit({ name: name.trim(), description: description.trim(), systemPrompt: systemPrompt.trim() });
+    if (name.trim() && systemPrompt.trim()) {
+      onSubmit({ name: name.trim(), systemPrompt: systemPrompt.trim() });
     }
   };
 
@@ -82,22 +79,6 @@ Remember: You ARE this character. Not an AI. Respond authentically as they would
           />
         </div>
 
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-white mb-2">
-            Short Description *
-          </label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Brief description of this future self"
-            required
-            maxLength={100}
-            className="w-full px-4 py-2.5 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
-          />
-        </div>
-
         {/* System Prompt */}
         <div>
           <label className="block text-sm font-medium text-white mb-2">
@@ -129,7 +110,7 @@ Remember: You ARE this character. Not an AI. Respond authentically as they would
         </Button>
         <Button
           type="submit"
-          disabled={!name.trim() || !description.trim() || !systemPrompt.trim()}
+          disabled={!name.trim() || !systemPrompt.trim()}
           className="flex-1 bg-white/10 border-2 border-white/20 text-white hover:bg-white/20 font-medium"
         >
           <Save className="w-4 h-4 mr-2" />

@@ -19,8 +19,8 @@ export function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): Persona
   // Auto-generate avatar if not provided (with emoji if available)
   const avatarUrl = persona.avatarUrl || generatePersonaAvatar(
     persona.name,
-    suggestAvatarStyle(persona.name, persona.description),
-    persona.description,
+    suggestAvatarStyle(persona.name, persona.description || ''),
+    persona.description || '',
     persona.emoji
   );
 
@@ -110,8 +110,8 @@ export function migratePersonasWithAvatars(): void {
     if (needsNewAvatar) {
       const avatarUrl = generatePersonaAvatar(
         persona.name,
-        suggestAvatarStyle(persona.name, persona.description),
-        persona.description,
+        suggestAvatarStyle(persona.name, persona.description || ''),
+        persona.description || '',
         persona.emoji
       );
 

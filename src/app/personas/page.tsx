@@ -116,13 +116,13 @@ export default function PersonasPage() {
     setPersonas(getPersonas());
   };
 
-  const handleCreatePersona = (data: { name: string; description: string; systemPrompt: string; emoji?: string }) => {
+  const handleCreatePersona = (data: { name: string; systemPrompt: string; emoji?: string }) => {
     savePersona(data);
     loadPersonas();
     setShowForm(false);
   };
 
-  const handleUpdatePersona = (data: { name: string; description: string; systemPrompt: string; emoji?: string }) => {
+  const handleUpdatePersona = (data: { name: string; systemPrompt: string; emoji?: string }) => {
     if (editingPersona) {
       updatePersona(editingPersona.id, data);
       loadPersonas();

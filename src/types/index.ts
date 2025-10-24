@@ -3,7 +3,7 @@
 export interface Persona {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   systemPrompt: string;
   emoji?: string;
   avatarUrl?: string;
