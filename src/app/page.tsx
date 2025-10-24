@@ -88,7 +88,7 @@ function SignInContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            Talk to Your Future Self
+            Talk to Your Favourite AI Character
           </motion.h1>
 
           <motion.p
