@@ -83,17 +83,31 @@
 
 ### What's Stored:
 
-**For Google Users:**
+**For Google Users (All Available Data):**
 ```json
 {
   "name": "John Doe",
   "email": "john@gmail.com",
   "image": "https://lh3.googleusercontent.com/...",
+  "googleId": "123456789012345678901",
+  "locale": "en-IN",
+  "emailVerified": true,
   "birthdate": "",
   "country": "",
   "profession": ""
 }
 ```
+
+**Data Fields Explained:**
+- `name` - Full name from Google profile
+- `email` - Primary verified email address
+- `image` - Profile picture URL
+- `googleId` - Unique Google account identifier (used internally)
+- `locale` - Language/region preference (e.g., en-IN, en-US)
+- `emailVerified` - Email verification status from Google
+- `birthdate` - Empty for Google users (can be filled manually later)
+- `country` - Empty for Google users (can be filled manually later)
+- `profession` - Empty for Google users (can be filled manually later)
 
 **Session Data:**
 ```json

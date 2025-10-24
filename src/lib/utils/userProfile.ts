@@ -3,8 +3,11 @@ export interface UserProfile {
   birthdate?: string; // Optional for Google sign-in users
   country?: string; // Optional for Google sign-in users
   profession?: string; // Optional for Google sign-in users
-  email?: string; // For Google sign-in users
-  image?: string; // Profile picture from Google
+  email?: string; // Email from Google
+  image?: string; // Profile picture URL from Google
+  googleId?: string; // Google account ID (unique identifier)
+  locale?: string; // Language/region preference (e.g., en-IN)
+  emailVerified?: boolean; // Whether email is verified
 }
 
 export const saveUserProfile = (profile: Partial<UserProfile>): void => {

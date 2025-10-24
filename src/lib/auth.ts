@@ -43,10 +43,20 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub || '';
-        // Add additional user data to session
+        // Add all Google user data to session
         if (token.email) session.user.email = token.email as string;
         if (token.name) session.user.name = token.name as string;
         if (token.picture) session.user.image = token.picture as string;
+        // @ts-ignore - Add custom fields to session
+        if (token.googleId) session.user.googleId = token.googleId as string;
+        // @ts-ignore
+        if (token.locale) session.user.locale = token.locale as string;
+        // @ts-ignore
+        if (token.emailVerified !== undefined) session.user.emailVerified = token.emailVerified as boolean;
+        // @ts-ignore
+        if (token.givenName) session.user.givenName = token.givenName as string;
+        // @ts-ignore
+        if (token.familyName) session.user.familyName = token.familyName as string;
       }
       return session;
     },
@@ -57,10 +67,15 @@ export const authOptions: NextAuthOptions = {
       if (account) {
         token.accessToken = account.access_token;
       }
-      // Store Google profile data in token
+      // Store all available Google profile data in token
       if (profile) {
         token.email = profile.email;
         token.picture = profile.picture;
+        token.googleId = profile.sub; // Google account ID
+        token.locale = profile.locale; // Language/region preference
+        token.emailVerified = profile.email_verified;
+        token.givenName = profile.given_name;
+        token.familyName = profile.family_name;
       }
       return token;
     },

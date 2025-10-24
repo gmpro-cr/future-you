@@ -38,20 +38,38 @@ export default function PersonasPage() {
     if (session?.user) {
       const existingProfile = getUserProfile();
 
-      // Only save if profile doesn't exist
-      if (!existingProfile) {
-        const googleUserData = {
-          name: session.user.name || '',
-          email: session.user.email || '',
-          image: session.user.image || '',
-          birthdate: '', // Will remain empty for Google users
-          country: '', // Will remain empty for Google users
-          profession: '', // Will remain empty for Google users
-        };
+      // Save or update Google user data
+      const googleUserData = {
+        name: session.user.name || '',
+        email: session.user.email || '',
+        image: session.user.image || '',
+        // @ts-ignore - Custom fields from Google
+        googleId: session.user.googleId || '',
+        // @ts-ignore
+        locale: session.user.locale || '',
+        // @ts-ignore
+        emailVerified: session.user.emailVerified || false,
+        birthdate: existingProfile?.birthdate || '', // Preserve existing data
+        country: existingProfile?.country || '', // Preserve existing data
+        profession: existingProfile?.profession || '', // Preserve existing data
+      };
 
-        saveUserProfile(googleUserData);
-        createUserSession(session.user.id || `google_${Date.now()}`, session.user.name || 'User');
-        console.log('✅ Google user data saved automatically');
+      saveUserProfile(googleUserData);
+
+      // Create session if doesn't exist
+      if (!existingProfile) {
+        createUserSession(
+          // @ts-ignore
+          session.user.googleId || session.user.id || `google_${Date.now()}`,
+          session.user.name || 'User'
+        );
+        console.log('✅ Google user data saved automatically:', {
+          name: googleUserData.name,
+          email: googleUserData.email,
+          googleId: googleUserData.googleId,
+          locale: googleUserData.locale,
+          emailVerified: googleUserData.emailVerified,
+        });
       }
 
       // Load the profile
