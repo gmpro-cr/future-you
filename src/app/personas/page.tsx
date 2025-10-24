@@ -152,7 +152,7 @@ export default function PersonasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex relative overflow-hidden">
+    <div className="min-h-screen bg-black flex flex-col lg:flex-row relative overflow-hidden">
       {/* Animated Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
         <motion.div
@@ -178,11 +178,11 @@ export default function PersonasPage() {
         <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
       </motion.div>
 
-      {/* Left Profile Panel */}
+      {/* Left Profile Panel - Hidden on mobile, visible on large screens */}
       <motion.div
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        className="w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col relative z-10"
+        className="hidden lg:flex lg:w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex-col relative z-10"
       >
         {/* Profile Header */}
         <div className="mb-6">
@@ -245,23 +245,51 @@ export default function PersonasPage() {
       </motion.div>
 
       {/* Main Content Area */}
-      <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto relative z-10">
+      <div className="flex-1 py-4 sm:py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto relative z-10">
         <div className="max-w-5xl mx-auto">
+          {/* Mobile Header with Profile Info */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="lg:hidden mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-6 h-6 text-black" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-bold text-white truncate">
+                    {userProfile?.name || 'User'}
+                  </h2>
+                  <p className="text-xs text-white/70">{userProfile?.profession || 'Your Profile'}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 hover:bg-white/20 border border-white/30 rounded-lg transition-colors flex-shrink-0"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5 text-white" />
+              </button>
+            </div>
+          </motion.div>
+
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-6 h-6 text-white" />
-              <h1 className="text-3xl font-bold text-white">
+            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">
                 Your Personas
               </h1>
             </div>
-            <p className="text-white/70">
+            <p className="text-sm sm:text-base text-white/70">
               {personas.length > 0
-                ? "We've created personalized personas based on your profile. Select one to start chatting!"
+                ? "Select a persona to start chatting!"
                 : "Create custom AI personas tailored to your goals"}
             </p>
           </motion.div>
@@ -271,13 +299,13 @@ export default function PersonasPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="mb-6"
+            className="mb-4 sm:mb-6"
           >
             <Button
               onClick={() => setShowForm(true)}
-              className="bg-white/10 border-2 border-white/20 hover:bg-white/20 text-white font-medium"
+              className="w-full sm:w-auto bg-white/10 border-2 border-white/20 hover:bg-white/20 text-white font-medium text-sm sm:text-base"
             >
-              <Plus className="w-5 h-5 mr-2" />
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Create New Persona
             </Button>
           </motion.div>
