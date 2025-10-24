@@ -118,16 +118,26 @@ export default function PersonasPage() {
   };
 
   const handleCreatePersona = async (data: { name: string; systemPrompt: string; emoji?: string }) => {
-    await savePersona(data);
-    await loadPersonas();
-    setShowForm(false);
+    try {
+      await savePersona(data);
+      await loadPersonas();
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error creating persona:', error);
+      alert('Failed to create persona. Please try again.');
+    }
   };
 
   const handleUpdatePersona = async (data: { name: string; systemPrompt: string; emoji?: string }) => {
     if (editingPersona) {
-      await updatePersona(editingPersona.id, data);
-      await loadPersonas();
-      setEditingPersona(null);
+      try {
+        await updatePersona(editingPersona.id, data);
+        await loadPersonas();
+        setEditingPersona(null);
+      } catch (error) {
+        console.error('Error updating persona:', error);
+        alert('Failed to update persona. Please try again.');
+      }
     }
   };
 

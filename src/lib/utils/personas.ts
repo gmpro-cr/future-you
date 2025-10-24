@@ -3,7 +3,14 @@ import { Persona } from '@/types';
 // Fetch all personas from API
 export async function getPersonas(): Promise<Persona[]> {
   try {
-    const response = await fetch('/api/personas');
+    const response = await fetch('/api/personas', {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.status}`);
+    }
+
     const result = await response.json();
 
     if (result.success) {
@@ -32,7 +39,14 @@ export async function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): P
         description: persona.description || '',
         emoji: persona.emoji,
       }),
+      cache: 'no-store',
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to create persona:', response.status, errorText);
+      throw new Error(`Failed to create persona: ${response.status}`);
+    }
 
     const result = await response.json();
 
@@ -41,10 +55,10 @@ export async function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): P
     }
 
     console.error('Failed to create persona:', result.error);
-    return null;
+    throw new Error(result.error?.message || 'Failed to create persona');
   } catch (error) {
     console.error('Error creating persona:', error);
-    return null;
+    throw error; // Re-throw to let caller handle it
   }
 }
 
