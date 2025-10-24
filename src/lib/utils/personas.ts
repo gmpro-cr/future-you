@@ -28,6 +28,13 @@ export async function getPersonas(): Promise<Persona[]> {
 // Create new persona via API
 export async function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): Promise<Persona | null> {
   try {
+    console.log('📤 Sending persona creation request:', {
+      name: persona.name,
+      systemPromptLength: persona.systemPrompt?.length,
+      description: persona.description,
+      emoji: persona.emoji,
+    });
+
     const response = await fetch('/api/personas', {
       method: 'POST',
       headers: {
@@ -42,22 +49,25 @@ export async function savePersona(persona: Omit<Persona, 'id' | 'createdAt'>): P
       cache: 'no-store',
     });
 
+    console.log('📥 Response status:', response.status, response.statusText);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Failed to create persona:', response.status, errorText);
-      throw new Error(`Failed to create persona: ${response.status}`);
+      console.error('❌ Failed to create persona:', response.status, errorText);
+      throw new Error(`Failed to create persona: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
+    console.log('✅ Persona creation result:', result);
 
     if (result.success) {
       return result.data.persona;
     }
 
-    console.error('Failed to create persona:', result.error);
+    console.error('❌ Failed to create persona:', result.error);
     throw new Error(result.error?.message || 'Failed to create persona');
   } catch (error) {
-    console.error('Error creating persona:', error);
+    console.error('💥 Error creating persona:', error);
     throw error; // Re-throw to let caller handle it
   }
 }

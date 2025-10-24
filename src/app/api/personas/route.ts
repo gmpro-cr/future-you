@@ -39,10 +39,20 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('🔵 POST /api/personas - Request received');
+
     const body = await req.json();
+    console.log('📦 Request body:', {
+      name: body.name,
+      systemPromptLength: body.systemPrompt?.length,
+      description: body.description,
+      emoji: body.emoji,
+    });
+
     const { name, systemPrompt, description, emoji } = body;
 
     if (!name || !systemPrompt) {
+      console.error('❌ Validation failed - missing name or systemPrompt');
       return NextResponse.json(
         {
           success: false,
@@ -55,7 +65,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log('✅ Validation passed, calling createPersona...');
     const persona = await createPersona(name, systemPrompt, description, emoji);
+    console.log('✅ Persona created successfully:', persona.id);
 
     return NextResponse.json({
       success: true,
@@ -71,13 +83,20 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Error creating persona:', error);
+    console.error('💥 Error creating persona:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'CREATE_ERROR',
           message: error.message || 'Failed to create persona',
+          details: error.details || error.hint || undefined,
         },
       },
       { status: 500 }
