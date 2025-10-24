@@ -74,7 +74,7 @@ export function useChat(sessionId: string, personaId?: string) {
       }));
 
       try {
-        const persona = personaId ? getPersonaById(personaId) : null;
+        const persona = personaId ? await getPersonaById(personaId) : null;
 
         // Debug logging
         if (persona) {
