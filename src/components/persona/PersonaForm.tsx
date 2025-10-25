@@ -20,23 +20,7 @@ interface PersonaFormProps {
 export function PersonaForm({ onSubmit, onCancel, initialData }: PersonaFormProps) {
   const [name, setName] = useState(initialData?.name || '');
   const [systemPrompt, setSystemPrompt] = useState(
-    initialData?.systemPrompt || `You are [NAME/ROLE]. Respond ONLY as this character would.
-
-YOUR PERSONALITY:
-- [Key trait 1]
-- [Key trait 2]
-- [Key trait 3]
-
-YOUR SPEAKING STYLE:
-- Speak in first person ("I", "my", "me")
-- [Specific way of speaking]
-- [Unique phrases or expressions]
-
-EXAMPLE RESPONSES:
-- "[Example of how you'd greet someone]"
-- "[Example of advice you'd give]"
-
-Remember: You ARE this character. Not an AI. Respond authentically as they would in every single message.`
+    initialData?.systemPrompt || 'Persona Description'
   );
 
   const handleSubmit = (e: React.FormEvent) => {
