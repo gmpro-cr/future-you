@@ -6,7 +6,6 @@ import {
   getConversationHistory,
 } from '@/lib/api/supabase';
 import { moderateContent, generateChatResponse } from '@/lib/api/openai';
-// import { checkRateLimit } from '@/lib/api/redis'; // Disabled for now
 import { chatRequestSchema, validateInput } from '@/lib/utils/validators';
 import {
   handleError,
@@ -15,10 +14,48 @@ import {
 
 const DEFAULT_SYSTEM_PROMPT = `You are the user's future self who has achieved success and peace. You speak in first person, sharing wisdom from your journey. Keep responses conversational and insightful, typically 2-4 sentences unless asked for details. Be warm, authentic, and encouraging.`;
 
+interface ApiErrorResponse {
+  error: string;
+  details?: string;
+  code?: string;
+  timestamp: string;
+}
+
+function createErrorResponse(
+  error: string,
+  details?: string,
+  code?: string,
+  status: number = 500
+): NextResponse<ApiErrorResponse> {
+  const response: ApiErrorResponse = {
+    error,
+    details,
+    code,
+    timestamp: new Date().toISOString(),
+  };
+
+  console.error('API Error Response:', {
+    ...response,
+    status,
+  });
+
+  return NextResponse.json(response, { status });
+}
+
 export async function POST(req: NextRequest) {
   try {
     // Get request body
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (err) {
+      return createErrorResponse(
+        'Invalid request format',
+        'Request body must be valid JSON',
+        'INVALID_JSON',
+        400
+      );
+    }
 
     console.log('📥 Received chat request:', {
       hasPersonaId: !!body.personaId,
@@ -28,85 +65,182 @@ export async function POST(req: NextRequest) {
     });
 
     // Validate input
-    const validated = validateInput(chatRequestSchema, body);
+    let validated;
+    try {
+      validated = validateInput(chatRequestSchema, body);
+    } catch (err: any) {
+      return createErrorResponse(
+        'Validation error',
+        err.message || 'Invalid request data',
+        'VALIDATION_ERROR',
+        400
+      );
+    }
 
     console.log('✅ Validated data:', {
       hasPersonaId: !!validated.personaId,
       hasPersonaPrompt: !!validated.personaPrompt,
       personaPromptLength: validated.personaPrompt?.length || 0,
+      messageLength: validated.message.length,
     });
 
-    // Rate limiting disabled (Upstash not configured)
-    // const rateLimitResult = await checkRateLimit(validated.sessionId);
-    // if (!rateLimitResult.success) {
-    //   throw new RateLimitError(rateLimitResult.reset);
-    // }
-
-    // Content moderation
-    const isFlagged = await moderateContent(validated.message);
-    if (isFlagged) {
-      throw new ModerationError();
+    // Moderate user message
+    try {
+      const moderationResult = await moderateContent(validated.message);
+      if (moderationResult.flagged) {
+        console.warn('⚠️ Content moderation triggered:', moderationResult);
+        return createErrorResponse(
+          'Content policy violation',
+          'Your message contains content that violates our policies. Please rephrase and try again.',
+          'MODERATION_ERROR',
+          400
+        );
+      }
+    } catch (err: any) {
+      console.error('❌ Moderation check failed:', err);
+      // Continue without moderation if service is unavailable
+      // This prevents complete failure when moderation API is down
     }
 
     // Get or create session
-    const session = await getOrCreateSession(validated.sessionId);
+    let session;
+    try {
+      session = await getOrCreateSession(validated.sessionId);
+      console.log('✅ Session retrieved/created:', session.id);
+    } catch (err: any) {
+      console.error('❌ Session creation failed:', err);
+      return createErrorResponse(
+        'Session initialization failed',
+        'Unable to create or retrieve session. Please try again.',
+        'SESSION_ERROR',
+        500
+      );
+    }
 
     // Get or create conversation
-    let conversationId: string;
-    if (!validated.conversationId) {
-      const conversation = await createConversation(session.id, validated.personaId);
-      conversationId = conversation.id;
-    } else {
-      conversationId = validated.conversationId;
+    let conversationId = validated.conversationId;
+    if (!conversationId) {
+      try {
+        const conversation = await createConversation({
+          session_id: session.id,
+          persona_id: validated.personaId || null,
+        });
+        conversationId = conversation.id;
+        console.log('✅ New conversation created:', conversationId);
+      } catch (err: any) {
+        console.error('❌ Conversation creation failed:', err);
+        return createErrorResponse(
+          'Conversation initialization failed',
+          'Unable to create conversation. Please try again.',
+          'CONVERSATION_ERROR',
+          500
+        );
+      }
     }
 
-    // Get conversation history for context
-    const history = await getConversationHistory(conversationId);
-    const contextMessages = history.map((msg: any) => ({
-      role: msg.role as 'user' | 'assistant',
-      content: msg.content,
-    }));
-
-    // Determine system prompt
-    let systemPrompt = DEFAULT_SYSTEM_PROMPT;
-    if (validated.personaPrompt) {
-      systemPrompt = validated.personaPrompt;
-      console.log('🎭 API using custom persona prompt:', {
-        personaId: validated.personaId,
-        promptLength: systemPrompt.length,
-        promptPreview: systemPrompt.substring(0, 100) + '...',
+    // Save user message
+    try {
+      await saveMessage({
+        conversation_id: conversationId,
+        content: validated.message,
+        role: 'user',
       });
-    } else {
-      console.log('ℹ️ API using default system prompt');
+      console.log('✅ User message saved');
+    } catch (err: any) {
+      console.error('❌ Failed to save user message:', err);
+      return createErrorResponse(
+        'Message storage failed',
+        'Unable to save your message. Please try again.',
+        'STORAGE_ERROR',
+        500
+      );
     }
+
+    // Get conversation history
+    let history;
+    try {
+      history = await getConversationHistory(conversationId);
+      console.log('✅ Retrieved conversation history:', history.length, 'messages');
+    } catch (err: any) {
+      console.error('❌ Failed to retrieve history:', err);
+      // Continue with empty history if retrieval fails
+      history = [];
+    }
+
+    // Prepare system prompt
+    const systemPrompt = validated.personaPrompt || DEFAULT_SYSTEM_PROMPT;
+
+    console.log('🤖 Generating AI response with:', {
+      historyLength: history.length,
+      systemPromptLength: systemPrompt.length,
+    });
 
     // Generate AI response
-    const { response, usage } = await generateChatResponse(
-      systemPrompt,
-      contextMessages,
-      validated.message
-    );
+    let aiResponse;
+    try {
+      aiResponse = await generateChatResponse({
+        message: validated.message,
+        history: history.map((msg) => ({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+        })),
+        systemPrompt,
+      });
 
-    // Save messages to database
-    await saveMessage(conversationId, 'user', validated.message, usage.prompt);
-    const assistantMessage = await saveMessage(
-      conversationId,
-      'assistant',
-      response,
-      usage.completion
-    );
+      if (!aiResponse || typeof aiResponse !== 'string') {
+        throw new Error('Invalid AI response format');
+      }
+
+      console.log('✅ AI response generated:', {
+        responseLength: aiResponse.length,
+      });
+    } catch (err: any) {
+      console.error('❌ AI generation failed:', err);
+      return createErrorResponse(
+        'AI response generation failed',
+        err.message || 'Unable to generate response. Please try again in a moment.',
+        'AI_ERROR',
+        503
+      );
+    }
+
+    // Save assistant message
+    try {
+      await saveMessage({
+        conversation_id: conversationId,
+        content: aiResponse,
+        role: 'assistant',
+      });
+      console.log('✅ Assistant message saved');
+    } catch (err: any) {
+      console.error('❌ Failed to save assistant message:', err);
+      // Continue even if save fails - user still gets the response
+    }
 
     return NextResponse.json({
-      success: true,
-      data: {
-        conversationId,
-        messageId: assistantMessage.id,
-        response,
-        timestamp: new Date().toISOString(),
-        tokenUsage: usage,
-      },
+      message: aiResponse,
+      conversationId,
+      timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    return handleError(error);
+  } catch (err: any) {
+    console.error('❌ Unhandled error in chat route:', err);
+
+    // Handle specific error types
+    if (err instanceof ModerationError) {
+      return createErrorResponse(
+        'Content policy violation',
+        err.message,
+        'MODERATION_ERROR',
+        400
+      );
+    }
+
+    // Generic error handler
+    return createErrorResponse(
+      'Internal server error',
+      'An unexpected error occurred. Please try again.',
+      'INTERNAL_ERROR',
+      500
+    );
   }
 }
