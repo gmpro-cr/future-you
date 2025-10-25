@@ -1,159 +1,214 @@
 'use client';
-
-import React, { useEffect, useRef, useState } from 'react';
-import { Menu, X, Plus, User, LogOut } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Persona } from '@/types';
-import { getPersonaById, migratePersonasWithAvatars } from '@/lib/utils/personas';
-import { useChat } from '@/hooks/useChat';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Message, Persona } from '@/types';
 import { MessageBubble } from './MessageBubble';
-import { TypingIndicator } from './TypingIndicator';
 import { InputArea } from './InputArea';
-import { ConfirmModal } from '@/components/shared/Modal';
-import { logout } from '@/lib/utils/auth';
-import { ChatSidebar } from './ChatSidebar';
-import { saveConversation } from '@/lib/utils/conversations';
-import { FloatingParticles } from '@/components/shared/FloatingParticles';
-import { syncConversation } from '@/lib/utils/sync';
-import { getUserProfile } from '@/lib/utils/userProfile';
+import { TypingIndicator } from './TypingIndicator';
+import { ConfirmModal } from '../shared/ConfirmModal';
+import { Plus, LogOut, AlertCircle, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ChatInterfaceProps {
   sessionId: string;
 }
 
 export function ChatInterface({ sessionId }: ChatInterfaceProps) {
-  const router = useRouter();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentPersona, setCurrentPersona] = useState<Persona | null>(null);
-
-  useEffect(() => {
-    const loadPersona = async () => {
-      const personaId = localStorage.getItem('selected_persona_id');
-      if (personaId) {
-        const persona = await getPersonaById(personaId);
-        setCurrentPersona(persona);
-      }
-    };
-
-    loadPersona();
-  }, []);
-
-  const { messages, isLoading, error, sendMessage, clearConversation } = useChat(sessionId, currentPersona?.id);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const maxRetries = 3;
 
-  // Save conversation whenever messages change
+  // Load messages from localStorage
   useEffect(() => {
-    if (messages.length > 0 && currentPersona) {
-      // Save to localStorage
-      saveConversation(sessionId, currentPersona.id, currentPersona.name, messages);
-
-      // Sync to backend if user is signed in with Google
-      const profile = getUserProfile();
-      if (profile && profile.googleId) {
-        // Debounce the sync to avoid too many requests
-        const timeoutId = setTimeout(() => {
-          syncConversation(currentPersona.id, messages);
-        }, 2000); // Wait 2 seconds after last message
-
-        return () => clearTimeout(timeoutId);
+    try {
+      const stored = localStorage.getItem(`chat_${sessionId}`);
+      if (stored) {
+        const data = JSON.parse(stored);
+        setMessages(data.messages || []);
+        setCurrentPersona(data.persona || null);
       }
+    } catch (err) {
+      console.error('Failed to load chat history:', err);
+      toast.error('Failed to load chat history');
     }
-  }, [messages, sessionId, currentPersona]);
+  }, [sessionId]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Save messages to localStorage
+  useEffect(() => {
+    try {
+      if (messages.length > 0 || currentPersona) {
+        localStorage.setItem(
+          `chat_${sessionId}`,
+          JSON.stringify({ messages, persona: currentPersona })
+        );
+      }
+    } catch (err) {
+      console.error('Failed to save chat history:', err);
+    }
+  }, [messages, currentPersona, sessionId]);
+
+  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+  }, [messages]);
+
+  const logApiError = useCallback((error: any, context: string) => {
+    const errorDetails = {
+      context,
+      message: error.message,
+      status: error.status,
+      timestamp: new Date().toISOString(),
+      sessionId,
+    };
+    console.error('API Error:', errorDetails);
+    
+    // Log to external service if available
+    if (typeof window !== 'undefined' && (window as any).errorLogger) {
+      (window as any).errorLogger.log(errorDetails);
+    }
+  }, [sessionId]);
+
+  const sendMessage = async (content: string) => {
+    if (!content.trim()) return;
+
+    // Clear previous error
+    setError(null);
+    setLastFailedMessage(content);
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: content.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: content,
+          sessionId,
+          history: messages,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || errorData.details || `Server error: ${response.status} ${response.statusText}`;
+        
+        logApiError(
+          { message: errorMessage, status: response.status },
+          'Chat API Request Failed'
+        );
+
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+
+      if (!data.message) {
+        throw new Error('Invalid response format from server');
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.message,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      if (data.persona && !currentPersona) {
+        setCurrentPersona(data.persona);
+      }
+
+      // Reset retry count on success
+      setRetryCount(0);
+      setLastFailedMessage(null);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to send message. Please try again.';
+      setError(errorMessage);
+      
+      logApiError(err, 'Message Send Failed');
+      
+      // Remove the user message on error to avoid confusion
+      setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+      
+      // Show toast notification
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRetry = useCallback(() => {
+    if (lastFailedMessage && retryCount < maxRetries) {
+      setRetryCount((prev) => prev + 1);
+      sendMessage(lastFailedMessage);
+    } else if (retryCount >= maxRetries) {
+      toast.error('Maximum retry attempts reached. Please try again later.');
+    }
+  }, [lastFailedMessage, retryCount, maxRetries]);
 
   const handleNewChat = () => {
-    setShowNewChatModal(true);
+    if (messages.length > 0) {
+      setShowNewChatModal(true);
+    }
   };
 
   const confirmNewChat = () => {
-    clearConversation();
+    setMessages([]);
+    setCurrentPersona(null);
+    setError(null);
+    setRetryCount(0);
+    setLastFailedMessage(null);
     setShowNewChatModal(false);
+    localStorage.removeItem(`chat_${sessionId}`);
   };
 
   const handleLogout = () => {
-    logout();
-    router.push('/');
+    localStorage.clear();
+    window.location.href = '/';
   };
 
-  const getWelcomeMessage = () => {
-    if (currentPersona) {
-      return `Hello! I'm ${currentPersona.name}. ${currentPersona.description} What would you like to talk about?`;
-    }
-    return "Hello! I'm your future self. I'm here to share what I've learned on this journey. What would you like to talk about?";
-  };
-
-  const displayMessages =
-    messages.length === 0
-      ? [
-          {
-            id: 'welcome',
-            role: 'assistant' as const,
-            content: getWelcomeMessage(),
-            timestamp: new Date().toISOString(),
-          },
-        ]
-      : messages;
+  const displayMessages = messages;
 
   return (
-    <div className="flex h-screen bg-black relative overflow-hidden">
-      {/* Animated Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%"],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-          style={{ backgroundSize: "200% 200%" }}
-        />
-      </div>
-      <FloatingParticles />
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center opacity-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.1 }}
-        transition={{ duration: 2 }}
-      >
-        <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
-      </motion.div>
-
-      {/* Sidebar */}
-      <ChatSidebar currentSessionId={sessionId} onNewChat={confirmNewChat} />
-
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col w-full min-w-0 relative z-10">
+    <>
+      <div className="flex flex-col h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         {/* Header */}
-        <div className="border-b border-white/10 bg-black/40 backdrop-blur-xl p-4 flex items-center justify-between">
+        <div className="flex items-center justify-between p-4 bg-black/40 backdrop-blur-xl border-b border-white/10">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push('/personas')}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              title="Back to Personas"
-            >
-              <User className="w-5 h-5 text-white" />
-            </button>
-            <div className="flex items-center gap-3">
-              {currentPersona?.avatarUrl && (
-                <img
-                  src={currentPersona.avatarUrl}
-                  alt={currentPersona.name}
-                  className="w-14 h-14 rounded-xl border-2 border-white/30 shadow-lg object-cover"
-                  crossOrigin="anonymous"
-                />
-              )}
-              <h2 className="font-semibold text-white text-lg">
-                {currentPersona ? currentPersona.name : 'Future You'}
-              </h2>
-            </div>
+            {currentPersona && (
+              <div className="flex items-center gap-3">
+                {currentPersona.avatarUrl && (
+                  <img
+                    src={currentPersona.avatarUrl}
+                    alt={currentPersona.name}
+                    className="w-10 h-10 rounded-full"
+                  />
+                )}
+                <div>
+                  <h2 className="text-white font-semibold">{currentPersona.name}</h2>
+                  <p className="text-white/60 text-sm">Your Future Self</p>
+                </div>
+              </div>
+            )}
+            {!currentPersona && (
+              <h2 className="text-white font-semibold">Future You</h2>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -172,7 +227,6 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
             </button>
           </div>
         </div>
-
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="max-w-3xl mx-auto">
@@ -187,19 +241,35 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
             {isLoading && <TypingIndicator />}
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 backdrop-blur-xl rounded-xl p-4 mb-4">
-                <p className="text-red-300 text-sm">{error}</p>
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-red-300 text-sm font-medium mb-2">Error</p>
+                    <p className="text-red-200 text-sm">{error}</p>
+                    {lastFailedMessage && retryCount < maxRetries && (
+                      <button
+                        onClick={handleRetry}
+                        className="flex items-center gap-2 mt-3 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg text-sm transition-colors"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        Retry {retryCount > 0 && `(${retryCount}/${maxRetries})`}
+                      </button>
+                    )}
+                    {retryCount >= maxRetries && (
+                      <p className="text-red-300 text-xs mt-2">Maximum retry attempts reached. Please try again later.</p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
         </div>
-
         {/* Input Area */}
         <div className="bg-black/40 backdrop-blur-xl border-t border-white/10">
           <InputArea onSendMessage={sendMessage} isLoading={isLoading} />
         </div>
       </div>
-
       {/* Modals */}
       <ConfirmModal
         isOpen={showNewChatModal}
@@ -210,6 +280,6 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
         confirmText="Start New Chat"
         isDestructive
       />
-    </div>
+    </>
   );
 }
