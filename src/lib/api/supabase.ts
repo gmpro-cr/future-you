@@ -10,7 +10,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database query functions
-
 export async function createSession(fingerprint: string) {
   const { data, error } = await supabase
     .from('sessions')
@@ -35,122 +34,8 @@ export async function getOrCreateSession(fingerprint: string) {
     return existingSession;
   }
 
-  // Create new session if not found or expired
+  // Create new session if none exists or expired
   return createSession(fingerprint);
-}
-
-export async function createConversation(sessionId: string, personaId?: string) {
-  const insertData = {
-    session_id: sessionId,
-    persona_type: 'custom', // Default value to satisfy NOT NULL constraint
-    custom_persona_description: personaId ? `Custom persona: ${personaId}` : null,
-  };
-
-  console.log('Creating conversation with data:', insertData);
-
-  const { data, error } = await supabase
-    .from('conversations')
-    .insert(insertData)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Supabase insert error:', error);
-    throw error;
-  }
-
-  console.log('Conversation created successfully:', data);
-  return data;
-}
-
-export async function saveMessage(
-  conversationId: string,
-  role: 'user' | 'assistant' | 'system',
-  content: string,
-  tokenCount?: number
-) {
-  const { data, error } = await supabase
-    .from('messages')
-    .insert({
-      conversation_id: conversationId,
-      role,
-      content,
-      token_count: tokenCount,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function getConversationHistory(conversationId: string, limit = 10) {
-  const { data, error } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('conversation_id', conversationId)
-    .eq('is_deleted', false)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (error) throw error;
-  return (data || []).reverse();
-}
-
-export async function getConversationsBySession(sessionId: string) {
-  const { data, error } = await supabase
-    .from('conversations')
-    .select('*')
-    .eq('session_id', sessionId)
-    .eq('is_active', true)
-    .order('updated_at', { ascending: false });
-
-  if (error) throw error;
-  return data || [];
-}
-
-export async function saveFeedback(
-  messageId: string,
-  conversationId: string,
-  sessionId: string,
-  feedbackType: 'thumbs_up' | 'thumbs_down' | 'rating',
-  rating?: number,
-  comment?: string
-) {
-  const { data, error } = await supabase
-    .from('feedback')
-    .insert({
-      message_id: messageId,
-      conversation_id: conversationId,
-      session_id: sessionId,
-      feedback_type: feedbackType,
-      rating,
-      comment,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-// Persona CRUD operations
-
-export async function getAllPersonas(sessionIdentifier?: string) {
-  let query = supabase
-    .from('personas')
-    .select('*')
-    .eq('is_active', true);
-
-  // Filter by session_identifier if provided (for user privacy)
-  if (sessionIdentifier) {
-    query = query.eq('session_identifier', sessionIdentifier);
-  }
-
-  const { data, error } = await query.order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data || [];
 }
 
 export async function createPersona(
@@ -206,4 +91,121 @@ export async function deletePersonaById(id: string) {
 
   if (error) throw error;
   return true;
+}
+
+export async function getPersonaById(id: string, sessionIdentifier?: string) {
+  const { data, error } = await supabase
+    .from('personas')
+    .select('*')
+    .eq('id', id)
+    .eq('is_active', true)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAllPersonas(sessionIdentifier?: string) {
+  let query = supabase
+    .from('personas')
+    .select('*')
+    .eq('is_active', true);
+
+  // Filter by session_identifier if provided (for user privacy)
+  if (sessionIdentifier) {
+    query = query.or(`is_public.eq.true,session_identifier.eq.${sessionIdentifier}`);
+  } else {
+    query = query.eq('is_public', true);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function createConversation(
+  sessionIdentifier: string,
+  personaId: string
+) {
+  const { data, error } = await supabase
+    .from('conversations')
+    .insert({
+      session_identifier: sessionIdentifier,
+      persona_id: personaId,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getConversationById(id: string) {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      persona:personas(*)
+    `
+    )
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getConversationsBySession(sessionIdentifier: string) {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select(
+      `
+      *,
+      persona:personas(*)
+    `
+    )
+    .eq('session_identifier', sessionIdentifier)
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getConversationMessages(conversationId: string) {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addMessage(
+  conversationId: string,
+  role: 'user' | 'assistant',
+  content: string
+) {
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: conversationId,
+      role,
+      content,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  // Update conversation's updated_at timestamp
+  await supabase
+    .from('conversations')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', conversationId);
+
+  return data;
 }
