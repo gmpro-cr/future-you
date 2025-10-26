@@ -1,13 +1,17 @@
-const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
+
+// Load environment variables from .env.local
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env.local') });
+
+const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing Supabase environment variables');
-  console.error('Required: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+  console.error('Required: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY');
   process.exit(1);
 }
 

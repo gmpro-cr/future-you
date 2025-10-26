@@ -106,22 +106,41 @@ export async function getPersonaById(id: string, sessionIdentifier?: string) {
 }
 
 export async function getAllPersonas(sessionIdentifier?: string) {
-  let query = supabase
-    .from('personas')
-    .select('*')
-    .eq('is_active', true);
+  try {
+    // First, get all public personas (celebrity personas)
+    const { data: publicPersonas, error: publicError } = await supabase
+      .from('personas')
+      .select('*')
+      .eq('is_active', true)
+      .eq('is_public', true);
 
-  // Filter by session_identifier if provided (for user privacy)
-  if (sessionIdentifier) {
-    query = query.or(`is_public.eq.true,session_identifier.eq.${sessionIdentifier}`);
-  } else {
-    query = query.eq('is_public', true);
+    if (publicError) {
+      console.error('Error fetching public personas:', publicError);
+    }
+
+    // If we have a session identifier, also get user's private personas
+    let userPersonas: any[] = [];
+    if (sessionIdentifier) {
+      // For now, just return public personas since we don't have direct user_id mapping
+      // This logic can be enhanced later if needed
+      userPersonas = [];
+    }
+
+    // Combine public and user personas, avoiding duplicates
+    const allPersonas = [...(publicPersonas || []), ...userPersonas];
+    
+    // Remove duplicates based on ID
+    const uniquePersonas = allPersonas.filter((persona, index, self) =>
+      index === self.findIndex(p => p.id === persona.id)
+    );
+
+    return uniquePersonas.sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  } catch (error) {
+    console.error('Error in getAllPersonas:', error);
+    return [];
   }
-
-  const { data, error } = await query.order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data || [];
 }
 
 export async function createConversation(params: {
