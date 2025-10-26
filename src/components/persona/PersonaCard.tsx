@@ -68,7 +68,8 @@ export function PersonaCard({ persona, onSelect, onEdit, onDelete }: PersonaCard
       {/* Actions */}
       <div className="flex gap-2 mt-3 justify-between">
         <div className="flex gap-2">
-          {onEdit && (
+          {/* Only show Edit/Delete for user-created personas, not for celebrity/public personas */}
+          {onEdit && !persona.isPublic && (
             <button
               onClick={() => onEdit(persona)}
               className="p-2 hover:bg-white/20 border border-white/30 rounded-lg transition-colors"
@@ -77,7 +78,7 @@ export function PersonaCard({ persona, onSelect, onEdit, onDelete }: PersonaCard
               <Edit2 className="w-4 h-4 text-white" />
             </button>
           )}
-          {onDelete && (
+          {onDelete && !persona.isPublic && (
             <button
               onClick={() => onDelete(persona)}
               className="p-2 hover:bg-white/20 border border-white/30 rounded-lg transition-colors"

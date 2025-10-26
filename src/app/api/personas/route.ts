@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
       emoji: p.emoji,
       type: p.type,
       createdAt: p.created_at,
+      isPublic: p.is_public || false,  // Include isPublic flag for celebrity personas
     }));
 
     console.log(`✅ Returning ${transformedPersonas.length} personas for session: ${sessionIdentifier}`);

@@ -8,6 +8,7 @@ export interface Persona {
   emoji?: string;
   avatarUrl?: string;
   createdAt: string;
+  isPublic?: boolean;  // True for celebrity/system personas visible to all users
 }
 
 export interface Message {
