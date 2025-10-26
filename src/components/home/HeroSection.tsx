@@ -1,5 +1,4 @@
 'use client';
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -18,7 +17,7 @@ export function HeroSection({ onCTAClick }: HeroSectionProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 bg-white relative"
+      className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 bg-black relative"
     >
       <div className="max-w-4xl mx-auto text-center w-full">
         {/* Floating badge */}
