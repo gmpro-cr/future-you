@@ -8,7 +8,7 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-export async function moderateContent(text: string): Promise<boolean> {
+export async function moderateContent(text: string): Promise<{ flagged: boolean }> {
   try {
     // Simple keyword-based moderation for now
     // Gemini doesn't have a direct moderation API like OpenAI
@@ -18,19 +18,21 @@ export async function moderateContent(text: string): Promise<boolean> {
       /\b(explicit|nsfw|sexual content)\b/i,
     ];
 
-    return harmfulPatterns.some((pattern) => pattern.test(text));
+    const flagged = harmfulPatterns.some((pattern) => pattern.test(text));
+    return { flagged };
   } catch (error) {
     console.error('Moderation error:', error);
     // Fail open - don't block users if moderation fails
-    return false;
+    return { flagged: false };
   }
 }
 
-export async function generateChatResponse(
-  systemPrompt: string,
-  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
-  userMessage: string
-) {
+export async function generateChatResponse(params: {
+  message: string;
+  history: Array<{ role: 'user' | 'assistant'; content: string }>;
+  systemPrompt: string;
+}): Promise<string> {
+  const { message: userMessage, history: messages, systemPrompt } = params;
   const maxRetries = 3;
   let lastError: any;
 
@@ -51,7 +53,6 @@ export async function generateChatResponse(
 
       // Build conversation context from history
       const contextMessages = messages
-        .filter((msg) => msg.role !== 'system')
         .slice(-8) // Keep last 8 messages for context
         .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
         .join('\n\n');
@@ -80,20 +81,9 @@ Remember: Respond as the character! Stay in character! Use their voice, personal
       const result = await model.generateContent(fullPrompt);
       const responseText = result.response.text();
 
-      // Gemini doesn't provide detailed token counts like OpenAI
-      // Estimate based on text length
-      const estimatedTokens = Math.ceil(responseText.length / 4);
-
       console.log(`✅ Response generated successfully on attempt ${attempt}`);
 
-      return {
-        response: responseText,
-        usage: {
-          prompt: estimatedTokens,
-          completion: estimatedTokens,
-          total: estimatedTokens * 2,
-        },
-      };
+      return responseText;
     } catch (error: any) {
       lastError = error;
 

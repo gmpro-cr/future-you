@@ -84,7 +84,7 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
       id: Date.now().toString(),
       role: 'user',
       content: content.trim(),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -125,7 +125,7 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: data.message,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       };
 
       setMessages((prev) => [...prev, assistantMessage]);

@@ -9,6 +9,7 @@ export interface Persona {
   avatarUrl?: string;
   createdAt: string;
   isPublic?: boolean;  // True for celebrity/system personas visible to all users
+  toneAttributes?: string[];  // Optional tone/personality attributes for display
 }
 
 export interface Message {

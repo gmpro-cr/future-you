@@ -1,6 +1,18 @@
 import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
+// Extend the Profile type to include Google-specific fields
+interface GoogleProfile {
+  sub: string;
+  email?: string;
+  name?: string;
+  picture?: string;
+  locale?: string;
+  email_verified?: boolean;
+  given_name?: string;
+  family_name?: string;
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -40,7 +52,7 @@ export const authOptions: NextAuthOptions = {
       else if (new URL(url).origin === baseUrl) return url;
       return `${baseUrl}/personas`;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (session.user) {
         session.user.id = token.sub || '';
         // Add all Google user data to session
@@ -69,13 +81,14 @@ export const authOptions: NextAuthOptions = {
       }
       // Store all available Google profile data in token
       if (profile) {
-        token.email = profile.email;
-        token.picture = profile.picture;
-        token.googleId = profile.sub; // Google account ID
-        token.locale = profile.locale; // Language/region preference
-        token.emailVerified = profile.email_verified;
-        token.givenName = profile.given_name;
-        token.familyName = profile.family_name;
+        const googleProfile = profile as GoogleProfile;
+        token.email = googleProfile.email;
+        token.picture = googleProfile.picture;
+        token.googleId = googleProfile.sub; // Google account ID
+        token.locale = googleProfile.locale; // Language/region preference
+        token.emailVerified = googleProfile.email_verified;
+        token.givenName = googleProfile.given_name;
+        token.familyName = googleProfile.family_name;
       }
       return token;
     },

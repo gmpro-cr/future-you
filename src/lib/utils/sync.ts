@@ -37,7 +37,7 @@ export async function syncUserProfile(): Promise<boolean> {
  */
 export async function syncPersonas(): Promise<boolean> {
   try {
-    const personas = getPersonas();
+    const personas = await getPersonas();
     if (personas.length === 0) {
       console.log('No personas to sync');
       return false;
@@ -173,7 +173,7 @@ export async function performCompleteSync(syncConversations: boolean = false): P
 
   // 3. Optionally sync conversations
   if (syncConversations) {
-    const personas = getPersonas();
+    const personas = await getPersonas();
     for (const persona of personas) {
       const conversationKey = `conversation_${persona.id}`;
       const conversationData = localStorage.getItem(conversationKey);

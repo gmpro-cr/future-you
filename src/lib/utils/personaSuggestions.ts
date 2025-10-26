@@ -8,11 +8,11 @@ export interface PersonaSuggestion {
 }
 
 export const generatePersonaSuggestions = (profile: UserProfile): PersonaSuggestion[] => {
-  const age = calculateAge(profile.birthdate);
+  const age = calculateAge(profile.birthdate || '');
   const suggestions: PersonaSuggestion[] = [];
 
   // Career-based personas
-  const careerPersonas = getCareerPersonas(profile.profession, age);
+  const careerPersonas = getCareerPersonas(profile.profession || '', age);
   suggestions.push(...careerPersonas);
 
   // Age-based personas

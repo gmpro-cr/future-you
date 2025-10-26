@@ -13,6 +13,23 @@ CREATE TABLE sessions (
   metadata JSONB DEFAULT '{}'::jsonb
 );
 
+-- Users Table (for authenticated Google users)
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  google_id TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  image TEXT,
+  locale TEXT,
+  email_verified BOOLEAN DEFAULT false,
+  birthdate DATE,
+  country TEXT,
+  profession TEXT,
+  metadata JSONB DEFAULT '{}'::jsonb
+);
+
 -- Personas Table (predefined + custom)
 CREATE TABLE personas (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -26,7 +43,10 @@ CREATE TABLE personas (
   emoji TEXT,
   system_prompt TEXT NOT NULL,
   tone_attributes JSONB DEFAULT '[]'::jsonb,
-  is_active BOOLEAN DEFAULT true
+  is_active BOOLEAN DEFAULT true,
+  is_public BOOLEAN DEFAULT false,
+  session_identifier TEXT,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Conversations Table
@@ -72,6 +92,11 @@ CREATE TABLE feedback (
 -- Indexes for performance
 CREATE INDEX idx_sessions_fingerprint ON sessions(fingerprint);
 CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
+CREATE INDEX idx_users_google_id ON users(google_id);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_personas_session_identifier ON personas(session_identifier);
+CREATE INDEX idx_personas_user_id ON personas(user_id);
+CREATE INDEX idx_personas_is_public ON personas(is_public);
 CREATE INDEX idx_conversations_session ON conversations(session_id);
 CREATE INDEX idx_conversations_updated_at ON conversations(updated_at DESC);
 CREATE INDEX idx_messages_conversation ON messages(conversation_id);
@@ -90,6 +115,11 @@ $$ LANGUAGE plpgsql;
 -- Trigger for conversations
 CREATE TRIGGER update_conversations_updated_at
 BEFORE UPDATE ON conversations
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger for users
+CREATE TRIGGER update_users_updated_at
+BEFORE UPDATE ON users
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Function to auto-generate conversation title
@@ -127,12 +157,16 @@ AFTER INSERT ON messages
 FOR EACH ROW EXECUTE FUNCTION increment_message_count();
 
 -- Row Level Security (RLS)
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE personas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- Policies (Allow all for MVP - can be tightened later)
+CREATE POLICY "Allow user operations" ON users FOR ALL USING (true);
 CREATE POLICY "Allow session operations" ON sessions FOR ALL USING (true);
+CREATE POLICY "Allow persona operations" ON personas FOR ALL USING (true);
 CREATE POLICY "Allow conversation operations" ON conversations FOR ALL USING (true);
 CREATE POLICY "Allow message operations" ON messages FOR ALL USING (true);
 

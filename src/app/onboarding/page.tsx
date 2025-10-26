@@ -28,7 +28,12 @@ export default function OnboardingPage() {
     // Load existing profile if any (for editing)
     const existingProfile = getUserProfile();
     if (existingProfile) {
-      setFormData(existingProfile);
+      setFormData({
+        name: existingProfile.name || '',
+        birthdate: existingProfile.birthdate || '',
+        country: existingProfile.country || '',
+        profession: existingProfile.profession || '',
+      });
     }
   }, [router]);
 

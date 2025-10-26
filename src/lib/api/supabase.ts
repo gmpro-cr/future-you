@@ -124,15 +124,16 @@ export async function getAllPersonas(sessionIdentifier?: string) {
   return data || [];
 }
 
-export async function createConversation(
-  sessionIdentifier: string,
-  personaId: string
-) {
+export async function createConversation(params: {
+  session_id: string;
+  persona_id?: string | null;
+}) {
   const { data, error } = await supabase
     .from('conversations')
     .insert({
-      session_identifier: sessionIdentifier,
-      persona_id: personaId,
+      session_id: params.session_id,
+      persona_id: params.persona_id || null,
+      persona_type: 'custom', // Default type
     })
     .select()
     .single();
@@ -209,3 +210,7 @@ export async function addMessage(
 
   return data;
 }
+
+// Alias for backward compatibility
+export const saveMessage = addMessage;
+export const getConversationHistory = getConversationMessages;

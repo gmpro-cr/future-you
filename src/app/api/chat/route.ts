@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get or create conversation
-    let conversationId = validated.conversationId;
+    let conversationId: string = validated.conversationId || '';
     if (!conversationId) {
       try {
         const conversation = await createConversation({
@@ -138,13 +138,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // At this point, conversationId is guaranteed to be a non-empty string
+    if (!conversationId) {
+      return createErrorResponse(
+        'Conversation ID missing',
+        'Unable to identify conversation. Please try again.',
+        'CONVERSATION_ERROR',
+        500
+      );
+    }
+
     // Save user message
     try {
-      await saveMessage({
-        conversation_id: conversationId,
-        content: validated.message,
-        role: 'user',
-      });
+      await saveMessage(conversationId, 'user', validated.message);
       console.log('✅ User message saved');
     } catch (err: any) {
       console.error('❌ Failed to save user message:', err);
@@ -159,7 +165,7 @@ export async function POST(req: NextRequest) {
     // Get conversation history
     let history;
     try {
-      history = await getConversationHistory(conversationId);
+      history = await getConversationHistory(conversationId!);
       console.log('✅ Retrieved conversation history:', history.length, 'messages');
     } catch (err: any) {
       console.error('❌ Failed to retrieve history:', err);
@@ -206,11 +212,7 @@ export async function POST(req: NextRequest) {
 
     // Save assistant message
     try {
-      await saveMessage({
-        conversation_id: conversationId,
-        content: aiResponse,
-        role: 'assistant',
-      });
+      await saveMessage(conversationId, 'assistant', aiResponse);
       console.log('✅ Assistant message saved');
     } catch (err: any) {
       console.error('❌ Failed to save assistant message:', err);
