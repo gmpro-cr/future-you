@@ -54,9 +54,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
-      <body className="antialiased font-sans">
-        <SessionProvider>{children}</SessionProvider>
-        <Toaster position="top-right" richColors />
+      <body className="antialiased font-sans bg-black">
+        <SessionProvider>
+          {children}
+          <Toaster position="top-right" richColors />
+        </SessionProvider>
       </body>
     </html>
   );
