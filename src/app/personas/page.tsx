@@ -209,14 +209,6 @@ export default function PersonasPage() {
           />
         </div>
         <FloatingParticles />
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center opacity-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.1 }}
-          transition={{ duration: 2 }}
-        >
-          <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
-        </motion.div>
         <div className="relative z-10">
           <PersonaForm
             initialData={editingPersona}
