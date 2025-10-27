@@ -7,6 +7,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { ConfirmModal } from '../shared/Modal';
 import { Plus, LogOut, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { DarkLayout } from '@/components/layouts/DarkLayout';
 
 interface ChatInterfaceProps {
   sessionId: string;
@@ -187,7 +188,8 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <DarkLayout particleCount={20}>
+        <div className="flex flex-col h-screen">
         {/* Header */}
         <div className="flex items-center justify-between p-4 bg-black/40 backdrop-blur-xl border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -269,7 +271,8 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
         <div className="bg-black/40 backdrop-blur-xl border-t border-white/10">
           <InputArea onSendMessage={sendMessage} isLoading={isLoading} />
         </div>
-      </div>
+        </div>
+      </DarkLayout>
       {/* Modals */}
       <ConfirmModal
         isOpen={showNewChatModal}
