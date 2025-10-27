@@ -7,7 +7,7 @@ import { ArrowRight, User } from 'lucide-react';
 import { Button } from '@/components/shared/Button';
 import { saveUserProfile, getUserProfile } from '@/lib/utils/userProfile';
 import { createUserSession, isUserLoggedIn } from '@/lib/utils/auth';
-import { FloatingParticles } from '@/components/shared/FloatingParticles';
+import { DarkLayout } from '@/components/layouts/DarkLayout';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -61,42 +61,14 @@ export default function OnboardingPage() {
   const isFormValid = formData.name && formData.birthdate && formData.country && formData.profession;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black px-4 py-12 overflow-hidden relative">
-      {/* Animated Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
+    <DarkLayout>
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%"],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-          style={{ backgroundSize: "200% 200%" }}
-        />
-      </div>
-
-      {/* Floating Particles */}
-      <FloatingParticles />
-
-      {/* Holographic Figure */}
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center opacity-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.1 }}
-        transition={{ duration: 2 }}
-      >
-        <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
-      >
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
         {/* Header */}
         <div className="text-center mb-8">
           <motion.div
@@ -231,7 +203,8 @@ export default function OnboardingPage() {
         >
           Your information is stored securely and never shared
         </motion.p>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+    </DarkLayout>
   );
 }
