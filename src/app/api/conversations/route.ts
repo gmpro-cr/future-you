@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getConversationsBySession } from '@/lib/api/supabase';
 import { handleError } from '@/lib/middleware/error-handler';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;

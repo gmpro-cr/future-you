@@ -10,17 +10,15 @@ export default function ChatPage() {
     return <FullPageLoader />;
   }
 
-  
-
   if (!fingerprint) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="text-center max-w-md">
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Unable to Start Session</h2>
-          <p className="text-gray-600 mb-4">Could not initialize chat session. Please refresh the page.</p>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+        <div className="text-center max-w-md backdrop-blur-xl bg-black/60 rounded-3xl p-12 border border-white/20">
+          <h2 className="text-xl font-semibold text-white mb-2">Unable to Start Session</h2>
+          <p className="text-white/70 mb-6">Could not initialize chat session. Please refresh the page.</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-6 py-3 bg-white text-black rounded-xl hover:bg-white/90 transition-colors font-semibold"
           >
             Refresh
           </button>
