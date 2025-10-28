@@ -5,6 +5,7 @@ export const chatRequestSchema = z.object({
   sessionId: z.string().min(1, 'Session ID is required'),
   conversationId: z.string().uuid().nullable().optional(),
   personaId: z.string().optional(),
+  personaSlug: z.string().optional(),
   personaPrompt: z.string().max(2000).optional(),
   message: z
     .string()
