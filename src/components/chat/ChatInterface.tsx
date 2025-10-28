@@ -7,6 +7,7 @@ import { TypingIndicator } from './TypingIndicator';
 import { ConfirmModal } from '../shared/Modal';
 import { Plus, LogOut, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { DarkLayout } from '@/components/layouts/DarkLayout';
 
 interface ChatInterfaceProps {
   sessionId: string;
