@@ -1,116 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllPersonas, createPersona } from '@/lib/api/supabase';
+import { getAllPersonas, getPersonaCategories, createPersonaRecord } from '@/lib/api/personas';
+import { PersonaCategory } from '@/types/persona';
 
+export const dynamic = 'force-dynamic';
+
+/**
+ * GET /api/personas - List all personas with filtering
+ */
 export async function GET(req: NextRequest) {
   try {
-    // Get session identifier from query params or headers
     const searchParams = req.nextUrl.searchParams;
-    const sessionIdentifier = searchParams.get('sessionId') || req.headers.get('x-session-id');
+    const category = searchParams.get('category') as PersonaCategory | null;
+    const search = searchParams.get('search');
+    const tags = searchParams.get('tags')?.split(',').filter(Boolean);
 
-    console.log('📥 GET /api/personas - sessionId:', sessionIdentifier);
+    console.log('📥 GET /api/personas', { category, search, tags });
 
-    const personas = await getAllPersonas(sessionIdentifier || undefined);
+    const [personas, categories] = await Promise.all([
+      getAllPersonas(category || undefined, search || undefined, tags),
+      getPersonaCategories()
+    ]);
 
-    // Transform to match frontend format
-    const transformedPersonas = personas.map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      systemPrompt: p.system_prompt,
-      emoji: p.emoji,
-      type: p.type,
-      createdAt: p.created_at,
-      isPublic: p.is_public || false,  // Include isPublic flag for celebrity personas
-    }));
-
-    console.log(`✅ Returning ${transformedPersonas.length} personas for session: ${sessionIdentifier}`);
+    console.log(`✅ Returning ${personas.length} personas`);
 
     return NextResponse.json({
       success: true,
       data: {
-        personas: transformedPersonas,
-      },
+        personas,
+        categories,
+        total: personas.length
+      }
     });
   } catch (error: any) {
-    console.error('Error fetching personas:', error);
+    console.error('❌ Error fetching personas:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'FETCH_ERROR',
-          message: error.message || 'Failed to fetch personas',
-        },
+          message: error.message || 'Failed to fetch personas'
+        }
       },
       { status: 500 }
     );
   }
 }
 
+/**
+ * POST /api/personas - Create new persona (admin only)
+ */
 export async function POST(req: NextRequest) {
   try {
-    console.log('🔵 POST /api/personas - Request received');
-
+    // TODO: Add admin authentication check
     const body = await req.json();
-    console.log('📦 Request body:', {
-      name: body.name,
-      systemPromptLength: body.systemPrompt?.length,
-      description: body.description,
-      emoji: body.emoji,
-    });
 
-    const { name, systemPrompt, description, emoji } = body;
+    console.log('📝 POST /api/personas', { name: body.name, category: body.category });
 
-    if (!name || !systemPrompt) {
-      console.error('❌ Validation failed - missing name or systemPrompt');
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Name and system prompt are required',
-          },
-        },
-        { status: 400 }
-      );
-    }
+    const persona = await createPersonaRecord(body);
 
-    // Get session identifier from headers or body
-    const sessionIdentifier = req.headers.get('x-session-id') || body.sessionId;
-    console.log('🔑 Session identifier:', sessionIdentifier);
-
-    console.log('✅ Validation passed, calling createPersona...');
-    const persona = await createPersona(name, systemPrompt, description, emoji, sessionIdentifier);
-    console.log('✅ Persona created successfully:', persona.id);
+    console.log('✅ Persona created:', persona.id);
 
     return NextResponse.json({
       success: true,
-      data: {
-        persona: {
-          id: persona.id,
-          name: persona.name,
-          description: persona.description,
-          systemPrompt: persona.system_prompt,
-          emoji: persona.emoji,
-          createdAt: persona.created_at,
-        },
-      },
+      data: { persona }
     });
   } catch (error: any) {
-    console.error('💥 Error creating persona:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-    });
+    console.error('❌ Error creating persona:', error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: 'CREATE_ERROR',
-          message: error.message || 'Failed to create persona',
-          details: error.details || error.hint || undefined,
-        },
+          message: error.message || 'Failed to create persona'
+        }
       },
       { status: 500 }
     );

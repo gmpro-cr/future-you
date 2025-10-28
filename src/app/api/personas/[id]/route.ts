@@ -1,5 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getPersonaBySlug, getPersonaById, updatePersonaRecord } from '@/lib/api/personas';
 import { updatePersonaById, deletePersonaById } from '@/lib/api/supabase';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * GET /api/personas/[id] - Get single persona by ID or slug
+ * This route handles both UUID lookups and slug lookups for backward compatibility
+ */
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+
+    console.log('📥 GET /api/personas/[id]', { id });
+
+    // Try to determine if this is a UUID or a slug
+    // UUIDs have a specific format with hyphens
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    let persona;
+    if (isUUID) {
+      persona = await getPersonaById(id);
+    } else {
+      // Treat as slug
+      persona = await getPersonaBySlug(id);
+    }
+
+    if (!persona) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Persona not found'
+          }
+        },
+        { status: 404 }
+      );
+    }
+
+    console.log('✅ Persona found:', persona.name);
+
+    return NextResponse.json({
+      success: true,
+      data: { persona }
+    });
+  } catch (error: any) {
+    console.error('❌ Error fetching persona:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'FETCH_ERROR',
+          message: error.message || 'Failed to fetch persona'
+        }
+      },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PUT(
   req: NextRequest,
