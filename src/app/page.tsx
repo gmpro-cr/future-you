@@ -88,7 +88,7 @@ function HomePageContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            Talk to Your Favourite AI Spirit
+            Chat with India's Icons
           </motion.h1>
 
           <motion.p
@@ -97,7 +97,7 @@ function HomePageContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            Connect with AI personas embodying the spirits of your favorite personalities, mentors, and guides.
+            Connect with AI personas of business leaders, celebrities, historical figures, and spiritual guides. Learn, grow, and be inspired.
           </motion.p>
 
           <motion.div
