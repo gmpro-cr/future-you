@@ -10,7 +10,8 @@
     "lint": "next lint",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "seed:personas": "tsx scripts/seed-personas.ts"
   },
   "dependencies": {
     "@auth/core": "^0.34.2",
@@ -53,6 +54,7 @@
     "eslint-config-prettier": "^9.1.0",
     "pg": "^8.16.3",
     "prettier": "^3.2.0",
+    "tsx": "^4.20.6",
     "vitest": "^1.6.0"
   },
   "engines": {
