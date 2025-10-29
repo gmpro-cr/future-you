@@ -13,7 +13,16 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['api.dicebear.com', 'ui-avatars.com', 'i.pravatar.cc', 'images.unsplash.com'],
+    domains: [
+      'api.dicebear.com',
+      'ui-avatars.com',
+      'i.pravatar.cc',
+      'images.unsplash.com',
+      'upload.wikimedia.org',
+      'images.livemint.com',
+      'inc42.com',
+      'akm-img-a-in.tosshub.com'
+    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -33,6 +42,26 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.livemint.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'inc42.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'akm-img-a-in.tosshub.com',
         pathname: '/**',
       },
     ],

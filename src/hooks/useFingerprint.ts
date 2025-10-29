@@ -40,16 +40,25 @@ export function useFingerprint() {
         const dataBuffer = encoder.encode(jsonString);
         const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
-        localStorage.setItem('future_you_session_id', hashHex);
-        setFingerprint(hashHex);
+        // Convert hash to UUID v4 format (deterministic from hash)
+        // Take first 16 bytes of hash and format as UUID
+        const uuid = [
+          hashArray.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join(''),
+          hashArray.slice(4, 6).map(b => b.toString(16).padStart(2, '0')).join(''),
+          hashArray.slice(6, 8).map(b => b.toString(16).padStart(2, '0')).join(''),
+          hashArray.slice(8, 10).map(b => b.toString(16).padStart(2, '0')).join(''),
+          hashArray.slice(10, 16).map(b => b.toString(16).padStart(2, '0')).join(''),
+        ].join('-');
+
+        localStorage.setItem('future_you_session_id', uuid);
+        setFingerprint(uuid);
       } catch (error) {
         console.error('Error generating fingerprint:', error);
-        // Fallback to random ID
-        const fallbackId = `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('future_you_session_id', fallbackId);
-        setFingerprint(fallbackId);
+        // Fallback to random UUID
+        const fallbackUuid = crypto.randomUUID();
+        localStorage.setItem('future_you_session_id', fallbackUuid);
+        setFingerprint(fallbackUuid);
       } finally {
         setIsLoading(false);
       }

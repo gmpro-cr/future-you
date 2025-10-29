@@ -19,29 +19,59 @@ export async function checkGuestStatus(sessionId: string): Promise<GuestSessionS
     };
   }
 
-  // Count guest messages across all conversations for this session
-  const { data: conversations, error } = await supabase
-    .from('conversations')
-    .select('id, guest_message_count')
-    .eq('session_id', sessionId)
-    .eq('is_guest_session', true);
-
-  if (error) {
-    console.error('Error checking guest status:', error);
-    throw new Error('Failed to check guest status');
+  // Validate sessionId format (should be UUID)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(sessionId)) {
+    console.warn('⚠️ Invalid session ID format (not UUID), treating as new guest session');
+    // Return default guest status for non-UUID session IDs
+    return {
+      isGuest: true,
+      messageCount: 0,
+      remainingMessages: GUEST_MESSAGE_LIMIT,
+      conversationIds: []
+    };
   }
 
-  const messageCount = (conversations || []).reduce(
-    (sum, conv) => sum + (conv.guest_message_count || 0),
-    0
-  );
+  try {
+    // Count guest messages across all conversations for this session
+    const { data: conversations, error } = await supabase
+      .from('conversations')
+      .select('id, guest_message_count')
+      .eq('session_id', sessionId)
+      .eq('is_guest_session', true);
 
-  return {
-    isGuest: true,
-    messageCount,
-    remainingMessages: Math.max(0, GUEST_MESSAGE_LIMIT - messageCount),
-    conversationIds: (conversations || []).map(c => c.id)
-  };
+    if (error) {
+      console.error('Error checking guest status:', error);
+      // Return default guest status on error instead of throwing
+      return {
+        isGuest: true,
+        messageCount: 0,
+        remainingMessages: GUEST_MESSAGE_LIMIT,
+        conversationIds: []
+      };
+    }
+
+    const messageCount = (conversations || []).reduce(
+      (sum, conv) => sum + (conv.guest_message_count || 0),
+      0
+    );
+
+    return {
+      isGuest: true,
+      messageCount,
+      remainingMessages: Math.max(0, GUEST_MESSAGE_LIMIT - messageCount),
+      conversationIds: (conversations || []).map(c => c.id)
+    };
+  } catch (err) {
+    console.error('Unexpected error in checkGuestStatus:', err);
+    // Return default guest status on any error
+    return {
+      isGuest: true,
+      messageCount: 0,
+      remainingMessages: GUEST_MESSAGE_LIMIT,
+      conversationIds: []
+    };
+  }
 }
 
 /**
