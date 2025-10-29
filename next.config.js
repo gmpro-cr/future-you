@@ -13,7 +13,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['api.dicebear.com', 'ui-avatars.com', 'i.pravatar.cc'],
+    domains: ['api.dicebear.com', 'ui-avatars.com', 'i.pravatar.cc', 'images.unsplash.com'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -28,6 +28,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'i.pravatar.cc',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
         pathname: '/**',
       },
     ],

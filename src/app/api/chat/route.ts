@@ -308,22 +308,25 @@ export async function POST(req: NextRequest) {
 
     // Build response with persona info and guest status
     return NextResponse.json({
-      message: aiResponse,
-      conversationId,
-      timestamp: new Date().toISOString(),
-      persona: {
-        id: persona.id,
-        name: persona.name,
-        slug: persona.slug,
-        avatar_url: persona.avatar_url,
-        short_description: persona.short_description,
-      },
-      guestLimit: guestStatus.isGuest ? {
-        current: updatedMessageCount,
-        max: 10,
-        remainingMessages: Math.max(0, 10 - updatedMessageCount),
-        isGuest: true
-      } : null
+      success: true,
+      data: {
+        message: aiResponse,
+        conversationId,
+        timestamp: new Date().toISOString(),
+        persona: {
+          id: persona.id,
+          name: persona.name,
+          slug: persona.slug,
+          avatar_url: persona.avatar_url,
+          short_description: persona.short_description,
+        },
+        guestLimit: guestStatus.isGuest ? {
+          current: updatedMessageCount,
+          max: 10,
+          remainingMessages: Math.max(0, 10 - updatedMessageCount),
+          isGuest: true
+        } : null
+      }
     });
   } catch (err: any) {
     console.error('❌ Unhandled error in chat route:', err);
