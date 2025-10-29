@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, supabaseAdmin } from './supabase';
 import { Persona, PersonaCategory, CreatePersonaInput } from '@/types/persona';
 
 /**
@@ -182,7 +182,8 @@ export async function createPersonaRecord(input: CreatePersonaInput): Promise<Pe
     knowledge_areas: input.knowledge_areas || []
   };
 
-  const { data, error } = await supabase
+  // Use admin client to bypass RLS policies for persona creation
+  const { data, error } = await supabaseAdmin
     .from('personas')
     .insert(personaData)
     .select()
@@ -208,7 +209,8 @@ export async function createPersonaRecord(input: CreatePersonaInput): Promise<Pe
  * @throws Error if the database update fails
  */
 export async function updatePersonaRecord(id: string, updates: Partial<Persona>): Promise<Persona> {
-  const { data, error } = await supabase
+  // Use admin client to bypass RLS policies for persona updates
+  const { data, error } = await supabaseAdmin
     .from('personas')
     .update(updates)
     .eq('id', id)
