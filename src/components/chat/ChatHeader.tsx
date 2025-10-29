@@ -3,7 +3,7 @@
 import { Persona } from '@/types/persona';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface ChatHeaderProps {
   persona: Persona;
@@ -35,10 +35,6 @@ export function ChatHeader({ persona }: ChatHeaderProps) {
           </div>
         </div>
       </div>
-
-      <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-        <Settings className="w-5 h-5 text-white" />
-      </button>
     </div>
   );
 }

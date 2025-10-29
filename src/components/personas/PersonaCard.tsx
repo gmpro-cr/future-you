@@ -14,15 +14,15 @@ export function PersonaCard({ persona }: PersonaCardProps) {
   return (
     <Link href={`/chat/${persona.slug}`}>
       <motion.div
-        className="group relative backdrop-blur-xl bg-white/5 rounded-2xl border border-white/10 overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
-        whileHover={{ scale: 1.02, y: -4 }}
+        className="group relative backdrop-blur-xl bg-white/5 rounded-xl border border-white/10 overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
+        whileHover={{ scale: 1.03, y: -2 }}
         whileTap={{ scale: 0.98 }}
       >
         {/* Premium Badge */}
         {persona.is_premium && (
-          <div className="absolute top-3 right-3 z-10 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full px-3 py-1 flex items-center gap-1">
-            <Crown className="w-3 h-3 text-white" />
-            <span className="text-xs font-semibold text-white">Premium</span>
+          <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full px-2 py-0.5 flex items-center gap-0.5">
+            <Crown className="w-2.5 h-2.5 text-white" />
+            <span className="text-[10px] font-semibold text-white">Pro</span>
           </div>
         )}
 
@@ -33,37 +33,28 @@ export function PersonaCard({ persona }: PersonaCardProps) {
             alt={persona.name}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+
+          {/* Name overlay on image */}
+          <div className="absolute bottom-0 left-0 right-0 p-2">
+            <h3 className="text-sm font-semibold text-white line-clamp-1 group-hover:text-white/90 transition-colors">
+              {persona.name}
+            </h3>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-white/90 transition-colors">
-            {persona.name}
-          </h3>
-
-          <p className="text-sm text-white/60 mb-3 line-clamp-2">
+        {/* Content - Minimal */}
+        <div className="p-2">
+          <p className="text-xs text-white/60 mb-2 line-clamp-1">
             {persona.short_description}
           </p>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {persona.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="text-xs px-2 py-0.5 bg-white/10 text-white/80 rounded-md"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
           {/* Stats */}
-          <div className="flex items-center gap-2 text-xs text-white/50">
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>{persona.conversation_count.toLocaleString()} chats</span>
+          <div className="flex items-center gap-1 text-[10px] text-white/50">
+            <MessageCircle className="w-3 h-3" />
+            <span>{persona.conversation_count.toLocaleString()}</span>
           </div>
         </div>
 

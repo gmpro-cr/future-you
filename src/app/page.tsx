@@ -1,31 +1,49 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useEffect, Suspense } from 'react';
 import { isUserLoggedIn, createUserSession } from '@/lib/utils/auth';
 import { FloatingParticles } from '@/components/shared/FloatingParticles';
+import { toast } from 'sonner';
 
 function HomePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const callbackUrl = searchParams.get('callbackUrl') || '/personas';
 
-  // Check if user is already logged in
+  // Check if user is already logged in (either NextAuth or localStorage)
   useEffect(() => {
-    if (isUserLoggedIn()) {
+    if (status === 'authenticated' && session?.user) {
+      // Create localStorage session from NextAuth session
+      const email = session.user.email || '';
+      const name = session.user.name || 'User';
+      const userId = session.user.id || `user_${Date.now()}`;
+
+      createUserSession(userId, name, email);
+      router.push('/personas');
+    } else if (isUserLoggedIn()) {
       router.push('/personas');
     }
-  }, [router]);
+  }, [session, status, router]);
 
   const handleGoogleSignIn = async () => {
     try {
-      // Redirect directly to personas page after Google sign-in
-      await signIn('google', { callbackUrl: '/personas' });
+      const result = await signIn('google', {
+        callbackUrl: '/personas',
+        redirect: true
+      });
+
+      if (result?.error) {
+        console.error('Sign in error:', result.error);
+        toast.error('Failed to sign in with Google. Please try again.');
+      }
     } catch (error) {
       console.error('Sign in error:', error);
+      toast.error('Failed to sign in with Google. Please try again.');
     }
   };
 
@@ -83,22 +101,13 @@ function HomePageContent() {
         {/* Content */}
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <motion.h1
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            Chat with India's Icons
+            Chat with your favourite AI Characters
           </motion.h1>
-
-          <motion.p
-            className="text-xl text-white/70 mb-12 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            Connect with AI personas of business leaders, celebrities, historical figures, and spiritual guides. Learn, grow, and be inspired.
-          </motion.p>
 
           <motion.div
             className="max-w-md mx-auto backdrop-blur-xl bg-black/60 rounded-3xl p-12 border border-white/20 shadow-2xl"

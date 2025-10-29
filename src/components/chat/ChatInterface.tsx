@@ -9,9 +9,11 @@ import { ChatHeader } from './ChatHeader';
 import { GuestLimitBanner } from './GuestLimitBanner';
 import { ConversationStarters } from './ConversationStarters';
 import { ConfirmModal } from '../shared/Modal';
+import { FloatingParticles } from '../shared/FloatingParticles';
 import { Plus, LogOut, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 interface ChatInterfaceProps {
   sessionId: string;
@@ -220,12 +222,43 @@ export function ChatInterface({ sessionId, persona }: ChatInterfaceProps) {
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="flex flex-col h-screen bg-black relative overflow-hidden">
+        {/* Animated Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black">
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5"
+            animate={{
+              backgroundPosition: ["0% 0%", "100% 100%"],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
+            style={{ backgroundSize: "200% 200%" }}
+          />
+        </div>
+
+        {/* Floating Particles */}
+        <FloatingParticles count={30} />
+
+        {/* Holographic Figure */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.1 }}
+          transition={{ duration: 2 }}
+        >
+          <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
+        </motion.div>
+
         {/* Header with Persona Info */}
-        <ChatHeader persona={persona} />
+        <div className="relative z-10">
+          <ChatHeader persona={persona} />
+        </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="relative z-10 flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="max-w-3xl mx-auto">
             {/* Guest Limit Banner (show at 7+ messages) */}
             {guestStatus && guestStatus.current >= 7 && (
@@ -287,7 +320,7 @@ export function ChatInterface({ sessionId, persona }: ChatInterfaceProps) {
         </div>
 
         {/* Input Area */}
-        <div className="bg-black/40 backdrop-blur-xl border-t border-white/10">
+        <div className="relative z-10 bg-black/40 backdrop-blur-xl border-t border-white/10">
           <InputArea onSendMessage={sendMessage} isLoading={isLoading} />
         </div>
       </div>
