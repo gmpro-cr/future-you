@@ -147,8 +147,9 @@ export async function incrementPersonaConversationCount(personaId: string): Prom
  * Create new persona (admin only)
  *
  * Generates a slug from the persona name and creates a new persona record.
+ * Only name and system_prompt are required - all other fields have sensible defaults.
  *
- * @param input - Persona creation data
+ * @param input - Persona creation data (only name and system_prompt required)
  * @returns The created Persona object
  * @throws Error if the database insert fails
  */
@@ -156,21 +157,34 @@ export async function createPersonaRecord(input: CreatePersonaInput): Promise<Pe
   // Generate slug from name
   const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+  // Generate UI Avatar URL as default
+  const generateAvatarUrl = (name: string) => {
+    const encodedName = encodeURIComponent(name);
+    return `https://ui-avatars.com/api/?name=${encodedName}&size=400&background=4F46E5&color=fff&bold=true&format=png`;
+  };
+
+  // Provide sensible defaults for all optional fields
+  const personaData = {
+    name: input.name,
+    slug,
+    category: input.category || 'creators' as PersonaCategory,
+    bio: input.bio || input.system_prompt, // Use system prompt as bio if not provided
+    short_description: input.short_description || `Chat with ${input.name}`,
+    personality_traits: input.personality_traits || ['Helpful', 'Friendly', 'Knowledgeable'],
+    system_prompt: input.system_prompt,
+    conversation_starters: input.conversation_starters || [
+      `Tell me about yourself`,
+      `What can you help me with?`,
+      `What's your area of expertise?`
+    ],
+    avatar_url: input.avatar_url || generateAvatarUrl(input.name),
+    tags: input.tags || [],
+    knowledge_areas: input.knowledge_areas || []
+  };
+
   const { data, error } = await supabase
     .from('personas')
-    .insert({
-      name: input.name,
-      slug,
-      category: input.category,
-      bio: input.bio,
-      short_description: input.short_description,
-      personality_traits: input.personality_traits,
-      system_prompt: input.system_prompt,
-      conversation_starters: input.conversation_starters,
-      avatar_url: input.avatar_url,
-      tags: input.tags || [],
-      knowledge_areas: input.knowledge_areas || []
-    })
+    .insert(personaData)
     .select()
     .single();
 

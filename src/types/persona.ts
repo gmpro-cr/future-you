@@ -46,13 +46,13 @@ export interface PersonaCardData {
 
 export interface CreatePersonaInput {
   name: string;
-  category: PersonaCategory;
-  bio: string;
-  short_description: string;
-  personality_traits: string[];
   system_prompt: string;
-  conversation_starters: string[];
-  avatar_url: string;
+  category?: PersonaCategory;
+  bio?: string;
+  short_description?: string;
+  personality_traits?: string[];
+  conversation_starters?: string[];
+  avatar_url?: string;
   tags?: string[];
   knowledge_areas?: string[];
 }
