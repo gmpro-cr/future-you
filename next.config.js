@@ -20,8 +20,7 @@ const nextConfig = {
       'images.unsplash.com',
       'upload.wikimedia.org',
       'images.livemint.com',
-      'inc42.com',
-      'akm-img-a-in.tosshub.com'
+      'inc42.com'
     ],
     remotePatterns: [
       {
@@ -57,11 +56,6 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'inc42.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'akm-img-a-in.tosshub.com',
         pathname: '/**',
       },
     ],
