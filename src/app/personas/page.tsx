@@ -263,56 +263,56 @@ export default function PersonasPage() {
         <div className="w-64 h-96 bg-gradient-to-b from-white to-gray-500 blur-3xl rounded-full" />
       </motion.div>
 
-      {/* Left Profile Panel - Hidden on mobile, visible on large screens */}
+      {/* Left Profile Panel - Always visible */}
       <motion.div
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        className="hidden lg:flex lg:w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 p-6 flex-col relative z-10"
+        className="w-64 lg:w-80 bg-black/40 backdrop-blur-xl border-r border-white/10 p-4 lg:p-6 flex-col relative z-10 flex"
       >
         {/* Profile Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-black" />
+        <div className="mb-4 lg:mb-6">
+          <div className="flex items-center gap-2 lg:gap-3 mb-3 lg:mb-4">
+            <div className="w-12 h-12 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="w-6 h-6 lg:w-8 lg:h-8 text-black" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-white">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base lg:text-xl font-bold text-white truncate">
                 {userProfile?.name || 'User'}
               </h2>
-              <p className="text-sm text-white/70">Your Profile</p>
+              <p className="text-xs lg:text-sm text-white/70">Your Profile</p>
             </div>
           </div>
         </div>
 
         {/* Recent Personas */}
-        <div className="space-y-4 mb-6 flex-1">
-          <h3 className="text-sm text-white/50 uppercase font-medium mb-3">Recent Interactions</h3>
+        <div className="space-y-2 lg:space-y-3 mb-4 lg:mb-6 flex-1 overflow-y-auto">
+          <h3 className="text-xs lg:text-sm text-white/50 uppercase font-medium mb-2 lg:mb-3">Recent Interactions</h3>
           {personas.slice(0, 5).map((persona) => (
             <div
               key={persona.id}
               onClick={() => handleSelectPersona(persona)}
-              className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer transition-colors"
+              className="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg bg-white/5 hover:bg-white/10 cursor-pointer transition-colors"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/10 rounded-full flex items-center justify-center">
-                <span className="text-lg">{persona.emoji || '🤖'}</span>
+              <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-white/20 to-white/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-base lg:text-lg">{persona.emoji || '🤖'}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-medium truncate">{persona.name}</p>
-                <p className="text-xs text-white/50">Click to chat</p>
+                <p className="text-xs lg:text-sm text-white font-medium truncate">{persona.name}</p>
+                <p className="text-xs text-white/50 hidden lg:block">Click to chat</p>
               </div>
             </div>
           ))}
           {personas.length === 0 && (
-            <p className="text-sm text-white/50 text-center py-4">No personas yet</p>
+            <p className="text-xs lg:text-sm text-white/50 text-center py-4">No personas yet</p>
           )}
         </div>
 
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/10 border-2 border-white/20 rounded-lg hover:bg-white/20 transition-colors text-white font-medium"
+          className="w-full flex items-center justify-center gap-2 px-3 lg:px-4 py-2 lg:py-3 bg-white/10 border-2 border-white/20 rounded-lg hover:bg-white/20 transition-colors text-white font-medium text-sm lg:text-base"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-4 h-4 lg:w-5 lg:h-5" />
           <span>Logout</span>
         </button>
       </motion.div>
@@ -320,33 +320,6 @@ export default function PersonasPage() {
       {/* Main Content Area */}
       <div className="flex-1 py-4 sm:py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto relative z-10">
         <div className="max-w-5xl mx-auto">
-          {/* Mobile Header with Profile Info */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="lg:hidden mb-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-6 h-6 text-black" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-bold text-white truncate">
-                    {userProfile?.name || 'User'}
-                  </h2>
-                  <p className="text-xs text-white/70">{userProfile?.profession || 'Your Profile'}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 hover:bg-white/20 border border-white/30 rounded-lg transition-colors flex-shrink-0"
-                title="Logout"
-              >
-                <LogOut className="w-5 h-5 text-white" />
-              </button>
-            </div>
-          </motion.div>
 
           {/* Header */}
           <motion.div
@@ -399,7 +372,7 @@ export default function PersonasPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+              className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 lg:gap-3"
             >
               {personas.map((persona, index) => (
                 <motion.div

@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/persona';
+  const callbackUrl = searchParams.get('callbackUrl') || '/personas';
 
   const handleGoogleSignIn = async () => {
     try {
@@ -128,7 +128,7 @@ function SignInContent() {
 
           {/* Guest Button */}
           <Button
-            onClick={() => router.push('/persona')}
+            onClick={() => router.push('/personas')}
             className="w-full bg-white/10 border-2 border-white/20 text-white hover:bg-white/20"
             size="lg"
           >

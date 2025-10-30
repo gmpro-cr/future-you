@@ -5,6 +5,7 @@ import { MessageBubble } from './MessageBubble';
 import { InputArea } from './InputArea';
 import { TypingIndicator } from './TypingIndicator';
 import { ConfirmModal } from '../shared/Modal';
+import { ChatSidebar } from './ChatSidebar';
 import { Plus, LogOut, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { DarkLayout } from '@/components/layouts/DarkLayout';
@@ -188,7 +189,12 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="flex h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        {/* Sidebar */}
+        <ChatSidebar currentSessionId={sessionId} onNewChat={confirmNewChat} />
+
+        {/* Main Chat Area */}
+        <div className="flex flex-col flex-1">
         {/* Header */}
         <div className="flex items-center justify-between p-4 bg-black/40 backdrop-blur-xl border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -269,6 +275,7 @@ export function ChatInterface({ sessionId }: ChatInterfaceProps) {
         {/* Input Area */}
         <div className="bg-black/40 backdrop-blur-xl border-t border-white/10">
           <InputArea onSendMessage={sendMessage} isLoading={isLoading} />
+        </div>
         </div>
       </div>
       {/* Modals */}
